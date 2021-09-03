@@ -1,0 +1,16 @@
+Package: roe
+Type: Package
+Title: R utilities for alevin-fry
+Version: 0.1.0
+Authors@R: c(person("Charlotte", "Soneson", 
+                    email = "charlottesoneson@gmail.com", 
+                    role = "aut"),
+             person("Dongze", "He", 
+                    email = "XXX", 
+                    role = c("aut", "cre")))
+Description: Provides R utilities for alevin-fry.
+License: XXX
+Encoding: UTF-8
+LazyData: false
+URL: https://github.com/COMBINE-lab/roe
+BugReports: https://github.com/COMBINE-lab/roe/issues
