@@ -1,0 +1,44 @@
+---
+title: "roe"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{roe}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+suppressPackageStartupMessages({
+  library(eisaR)
+  library(roe)
+})
+```
+
+# Preparing a splici index for quantification with alevin-fry
+
+```{r}
+outdir <- tempdir()
+make_splici_txome(
+  gtf_path = system.file("extdata/small_example.gtf", package = "eisaR"),
+  genome_path = system.file("extdata/small_example_genome.fa", package = "eisaR"),
+  read_length = 10,
+  flank_trim_length = 5,
+  output_dir = outdir,
+  file_name_prefix = "transcriptome_splici",
+  extra_spliced = NULL,
+  extra_unspliced = NULL,
+  dedup_seqs = FALSE,
+  write_actual_flank = FALSE
+)
+grep("transcriptome_splici", dir(outdir), value = TRUE)
+```
+

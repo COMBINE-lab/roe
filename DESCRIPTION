@@ -3,14 +3,34 @@ Type: Package
 Title: R utilities for alevin-fry
 Version: 0.1.0
 Authors@R: c(person("Charlotte", "Soneson", 
-                    email = "charlottesoneson@gmail.com", 
-                    role = "aut"),
-             person("Dongze", "He", 
-                    email = "XXX", 
-                    role = c("aut", "cre")))
+                    role = c("aut"), email = "charlottesoneson@gmail.com", 
+                    comment = c(ORCID = "0000-0003-3833-2169")),
+             person("Dongze", "He", email = "dhe17@umd.edu", 
+                    role = c("cre", "aut")))
 Description: Provides R utilities for alevin-fry.
 License: XXX
 Encoding: UTF-8
 LazyData: false
 URL: https://github.com/COMBINE-lab/roe
 BugReports: https://github.com/COMBINE-lab/roe/issues
+Imports: 
+    Biobase,
+    BiocGenerics,
+    Biostrings,
+    BSgenome,
+    dplyr,
+    eisaR,
+    GenomeInfoDb,
+    GenomicFeatures,
+    GenomicRanges,
+    rlang,
+    S4Vectors,
+    stringr,
+    utils
+RoxygenNote: 7.1.1
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
