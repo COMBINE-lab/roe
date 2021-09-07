@@ -8,7 +8,7 @@ Authors@R: c(person("Charlotte", "Soneson",
              person("Dongze", "He", email = "dhe17@umd.edu", 
                     role = c("cre", "aut")))
 Description: Provides R utilities for alevin-fry.
-License: XXX
+License: BSD 3-clause
 Encoding: UTF-8
 LazyData: false
 URL: https://github.com/COMBINE-lab/roe
