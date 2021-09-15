@@ -13,8 +13,7 @@ make_splici_txome(
   file_name_prefix = "transcriptome_splici",
   extra_spliced = NULL,
   extra_unspliced = NULL,
-  dedup_seqs = FALSE,
-  write_actual_flank = FALSE
+  dedup_seqs = FALSE
 )
 }
 \arguments{
@@ -47,7 +46,8 @@ duplicate sequences.}
 
 \item{write_actual_flank}{Logical scalar indicating whether or not to write
 out the actual flank length (which may be shorter than the indicated one
-if the latter would mean going outside the gene boundaries).}
+if the latter would mean going outside the gene boundaries). 
+This argument is currently under development.}
 }
 \value{
 Nothing is returned, but the necessary files for the splici

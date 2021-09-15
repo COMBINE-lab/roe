@@ -35,20 +35,6 @@
 #' @examples
 #' ## Put a small example here
 #'
-#' @importFrom eisaR getFeatureRanges getTx2Gene
-#' @importFrom Biostrings readDNAStringSet writeXStringSet
-#' @import BSgenome
-#' @importFrom stringr str_detect word
-#' @importFrom GenomicFeatures makeTxDbFromGFF genes extractTranscriptSeqs
-#' @importFrom BiocGenerics unlist relist start end
-#' @importFrom GenomicRanges reduce trim
-#' @importFrom S4Vectors mcols metadata split
-#' @importFrom GenomeInfoDb seqlevels seqlengths
-#' @importFrom Biobase rowMin rowMax
-#' @importFrom rlang .data
-#' @importFrom dplyr %>% mutate
-#' @importFrom utils write.table
-
 make_splici_txome <- function(gtf_path,
                               genome_path,
                               read_length,
@@ -74,6 +60,20 @@ make_splici_txome <- function(gtf_path,
                                       )
   )
 }
+
+#' @importFrom eisaR getFeatureRanges getTx2Gene
+#' @importFrom Biostrings readDNAStringSet writeXStringSet
+#' @import BSgenome
+#' @importFrom stringr str_detect word
+#' @importFrom GenomicFeatures makeTxDbFromGFF genes extractTranscriptSeqs
+#' @importFrom BiocGenerics unlist relist start end
+#' @importFrom GenomicRanges reduce trim
+#' @importFrom S4Vectors mcols metadata split
+#' @importFrom GenomeInfoDb seqlevels seqlengths
+#' @importFrom Biobase rowMin rowMax
+#' @importFrom rlang .data
+#' @importFrom dplyr %>% mutate
+#' @importFrom utils write.table
 
 .make_splici_txome <- function(gtf_path,
                                genome_path,
@@ -261,7 +261,7 @@ make_splici_txome <- function(gtf_path,
   ############################################################################
   message("Writing outputs...")
   
-  # df <- eisaR::getTx2Gene(grl)
+  df <- eisaR::getTx2Gene(grl)
   # utils::write.table(df, out_t2g, sep = "\t", row.names = FALSE,
   #                    quote = FALSE, col.names = FALSE)
   ## TODO: Make this more robust to possible transcript names containing '-'
@@ -321,12 +321,12 @@ make_splici_txome <- function(gtf_path,
         if (startsWith(ln, ">")) {
           # it is a header, write to t2g file and fasta file
           txp_name = gsub(">", "", ln)
-          utils::write.table(matrix(c(txp_name,
-                                      paste0(txp_name, "-U")),
-                                    nrow = 1), file = out_t2g,
-                             sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+          # utils::write.table(matrix(c(txp_name,
+          #                             paste0(txp_name, "-U")),
+          #                           nrow = 1), file = out_t2g,
+          #                    sep = "\t",
+          #                    row.names = FALSE, quote = FALSE,
+          #                    col.names = FALSE, append = TRUE)
           utils::write.table(matrix(c(txp_name, txp_name, "U"),
                                     nrow = 1),
                              file = out_t2g3col, sep = "\t",
