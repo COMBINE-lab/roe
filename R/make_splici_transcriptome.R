@@ -27,14 +27,92 @@
 #'
 #' @author Dongze He
 #'
+#'
+#' @details
+#' 
+#' The term \code{splici} is shorthand for spliced + intronic reference sequence.   
+#' This reference sequence is prepared by extracting the spliced transcripts from the reference genome according to  the desired annotation (e.g. unfiltered, or filtered for certain classes of transcripts),as well as the collapsed intervals corresponding to the introns of genes. 
+#' The intronic sequences of the \code{splici} reference play important roles in the various kinds of experiments discussed in this paper.
+#' For single-cell RNA-seq data, although one typically focuses on the  fragments and UMIs arising from the (spliced) transcriptome,and only considers the spliced and ambiguous counts when performing downstream analyses, the intronic sequences act similarly to decoy sequences proposed by Srivastava 2020 et al. 
+#' They account for fragments that might otherwise selectively-align or pseudoalign to the transcriptome with lower quality, but that, in fact, derive from some unspliced RNA transcript molecule. 
+#' \code{splici} improves the accuracy and false discovery of mapping, as the intronic seuqences of \code{splici} act as the decoy sequence to absorb reads map to the spliced transcriptome with low quality.
+#' For single-nucleus RNA-seq and RNA velocity analysis, the usage is straightforward, as the intronic sequences enable \code{alevin-fry} to detect the signals from unspliced, immature RNA transcripts, which are crucial in those analyses.
+#' 
+#' To construct the \code{splici} reference, one provides a  genome fasta file and a gene annotation GTF file of the  target species, as well as the read length of the experiments  to be processed. 
+#' Here we describe the procedure to extract the  \code{splici} sequence of one gene; the procedure will be applied for  all genes specified in the provided GTF file.   
+#' First, the spliced transcript sequences are extracted for all isoforms of the gene. 
+#' Next, the intronic regions of each isoform of  the gene are extracted.  
+#' These intronic regions consist of the  full length of the unspliced transcript, subtracting out any  exonic sequence.  
+#' If alternative \code{splici}ng positions occur within  exons, certain sub-intervals of a gene can appear as part of both  spliced transcripts and as intronic sequence. 
+#' Additionally, each  extracted intronic interval is extended by the provided flanking length at its starting and ending position. 
+#' By adding this flanking  length, the reference can account for reads that map to the junction  of an exon and an intron.  
+#' Otherwise these reads cannot be confidently  mapped to either the unflanked intronic region or to the spliced  isoforms of the gene. 
+#' The intronic regions of different isoforms often overlap considerably.   
+#' To avoid repetitive indexing of shared sub-intervals, the flanked  intronic regions across all isoforms of a gene will be combined if  they share overlapping sub-regions.  
+#' As the result, each unique  genomic sequence will appear only once in the combined intronic  regions of the gene.  
+#' The genomic sequences of those combined  intronic regions will then be extracted as the intronic part of  this gene. 
+#' 
+#' These combined intronic sequences will each be given  a unique name, and all will be added to the \code{splici}  reference.
+#' The process described above will then be applied to all genes  defined in the provided GTF file.  
+#' These sequences will be  combined with any custom (user-provided) sequences, for example, one can include the sequence of  mitochondrial genes to avoid spurious mapping further. 
+#' The resulting sequences constitute the \code{splici} reference. 
+#' Note that sometimes one genomic region may belong to more than one gene. 
+#' In this case, extracted sequences can appear multiple times in \code{splici} reference with different names. 
+#' As duplicated sequences will anyway appear only once in the \code{salmon} index except if one specifically sets the -{}-keepDuplicates flag (which we have not), we did not explicitly deduplicate repeated sequences when constructing the \code{splici} reference.  
+#' However, our script to construct the \code{splici} reference accepts an optional argument, dedup_seqs that will perform this identical sequence deduplication during reference construction. 
+#' Currently, the \code{splici} index depends on both the reference genome and annotation to be indexed, as well as the length of the reads that will be mapped against this index.  
+#' The read length is used to determine an appropriate flanking size (default of read length - 5) to add to the ends of the extracted collapsed intron sequences.  
+#' The read length used for construction need not exactly match those being mapped, and we have evaluated that the index is reasonably robust to similar read lengths and degrades gracefully as the indexed and mapped read lengths diverge.  
+#' Further, the short-read sequencing by synthesis most commonly employed for single-cell and single-nucleus experiments comprises a small set of characteristic read lengths.  
+#' Nonetheless, by simply constructing the index with a single flanking length that is as large as the longest reads to be considered, and by propagating the relative splice junction annotations to the mapping step, it should be possible for the index to be constructed independently of the read length parameter.  
+#' We are currently exploring the optimal implementation of this enhancement.
+#' 
+#' @references
+#' Srivastava et al. (2020).
+#' Alignment and mapping methodology influence transcript abundance estimation
+#' \url{https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-02151-8}
+#' 
+#' He et al. (2021)
+#' Alevin-fry unlocks rapid, accurate, and memory-frugal quantification of single-cell RNA-seq data
+#' \url{https://www.biorxiv.org/content/10.1101/2021.06.29.450377v2}
+#' 
+#'
+#'
 #' @export
 #'
 #' @return Nothing is returned, but the necessary files for the splici
 #'   transcriptome are written to the designated \code{output_dir}.
 #'
 #' @examples
-#' ## Put a small example here
-#'
+#' 
+#' library(roe)
+#' library(BSgenome)
+#' 
+#' gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
+#' genome_path <- system.file("extdata/small_example_genome.fa", package = "roe")
+#' extra_spliced = system.file("extdata/extra_spliced.txt", package = "roe")
+#' extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe")
+#' output_dir = tempdir()
+#' read_length=5
+#' flank_trim_length = 2
+#' 
+#' # run the function
+#' make_splici_txome(gtf_path=gtf_path,
+#'                   genome_path=genome_path,
+#'                   read_length=read_length,
+#'                   flank_trim_length = flank_trim_length,
+#'                   output_dir=output_dir,
+#'                   extra_spliced=extra_spliced,
+#'                   extra_unspliced=extra_unspliced,
+#'                   dedup_seqs=FALSE
+#'                   # ,write_actual_flank=FALSE
+#' ) 
+#' 
+#' # grep the output filenames
+#' grep("transcriptome_splici", dir(outdir), value = TRUE)
+#' 
+
+
 make_splici_txome <- function(gtf_path,
                               genome_path,
                               read_length,
