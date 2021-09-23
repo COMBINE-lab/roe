@@ -72,9 +72,8 @@ make_splici_txome(
 grep("transcriptome_splici", dir(outdir), value = TRUE)
 ```
 
-The `make_splici_txome()` function has no returned value, but writes three files to your specified output directory `output_dir`. They are 
+The `make_splici_txome()` function has no returned value, but writes files to your specified output directory `output_dir`. They are 
 - A FASTA file that stores the extracted splici sequences.
-- A GTF file taht strores the annotation of the extracted *splici* transcripts.
 - A three columns' transcript-name-to-gene-name file that stores the name of each transcript in the splici index reference, their corresponding gene name, and the splicing status (`S` for spliced and `U` for unspliced) of those transcripts.
 
 ## the *splici* index
