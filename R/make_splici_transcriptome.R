@@ -368,10 +368,10 @@ make_splici_txome <- function(gtf_path,
         if (startsWith(ln, ">")) {
           # it is a header, write to t2g files and fasta file
           txp_name <- gsub(">", "", ln)
-          utils::write.table(matrix(c(txp_name, txp_name), nrow = 1),
-                             file = out_t2g, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+          # utils::write.table(matrix(c(txp_name, txp_name), nrow = 1),
+          #                    file = out_t2g, sep = "\t",
+          #                    row.names = FALSE, quote = FALSE,
+          #                    col.names = FALSE, append = TRUE)
           utils::write.table(matrix(c(txp_name, txp_name, "S"),
                                     nrow = 1),
                              file = out_t2g3col, sep = "\t",
