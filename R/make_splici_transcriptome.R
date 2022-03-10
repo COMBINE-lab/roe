@@ -19,7 +19,9 @@
 #' @param extra_unspliced Character scalar providing the path to a fasta file
 #'   with additional sequences to include among the unspliced ones.
 #' @param dedup_seqs Logical scalar indicating whether or not to remove
-#'   duplicate sequences.
+#'   duplicate sequences.#' 
+#' @param pre_flanking_merge Logical scalar indicating whether or not to 
+#'   merge overlapping introns caused by adding flanking length.
 #' @param write_actual_flank Logical scalar indicating whether or not to write
 #'   out the actual flank length (which may be shorter than the indicated one
 #'   if the latter would mean going outside the gene boundaries). 
@@ -118,12 +120,13 @@
 make_splici_txome <- function(gtf_path,
                               genome_path,
                               read_length,
-                              flank_trim_length = 5,
                               output_dir,
+                              flank_trim_length = 5,
                               file_name_prefix = "transcriptome_splici",
                               extra_spliced = NULL,
                               extra_unspliced = NULL,
-                              dedup_seqs = FALSE
+                              dedup_seqs = FALSE,
+                              pre_flanking_merge = FALSE
                               # ,write_actual_flank=FALSE
                               ) {
   
@@ -135,7 +138,8 @@ make_splici_txome <- function(gtf_path,
                                       file_name_prefix = file_name_prefix,
                                       extra_spliced=extra_spliced,
                                       extra_unspliced=extra_unspliced
-                                      ,dedup_seqs=dedup_seqs
+                                      ,dedup_seqs=dedup_seqs,
+                                      pre_flanking_merge = pre_flanking_merge
                                       # ,write_actual_flank=FALSE
                                       )
   )
@@ -163,7 +167,8 @@ make_splici_txome <- function(gtf_path,
                                file_name_prefix = "transcriptome_splici",
                                extra_spliced = NULL,
                                extra_unspliced = NULL,
-                               dedup_seqs = FALSE
+                               dedup_seqs = FALSE,
+                               pre_flanking_merge = FALSE
                                # ,write_actual_flank=FALSE
                                ) {
   ## TODO: Add this sentence somewhere in the documentation:
@@ -230,8 +235,10 @@ make_splici_txome <- function(gtf_path,
   # identify all introns and convert to GRanges
   intron_idx <- names(grl) %in% S4Vectors::metadata(grl)$featurelist$intron
   intron_gr <- BiocGenerics::unlist(grl[intron_idx])
-  
-  intron_gr = .add_metadata(intron_gr, x = x)
+  # pre-flanking merge
+  if (pre_flanking_merge) {
+    intron_gr = .add_metadata(intron_gr, x = x)
+  }
   
   # add flanking length to each side
   intron_gr_flanked = intron_gr + flank_length
@@ -299,7 +306,9 @@ make_splici_txome <- function(gtf_path,
   #     )
   # 
   # }
-  intron_gr_flanked = .add_metadata(intron_gr_flanked, x=x)
+  if (!pre_flanking_merge) {  
+    intron_gr_flanked = .add_metadata(intron_gr_flanked, x=x)
+  }
   
   # remake intron GRangesList
   intron_grl <- BiocGenerics::relist(intron_gr_flanked, lapply(
@@ -433,9 +442,9 @@ make_splici_txome <- function(gtf_path,
   # group introns by gene, then collapse overlapping ranges
   intron_grl <- GenomicRanges::reduce(S4Vectors::split(intron_gr,
                                                        intron_gr$gene_id))
-  
-  # clean txp names and gene names
   intron_gr <- BiocGenerics::unlist(intron_grl)
+
+  # clean txp names and gene names
   intron_gr$exon_rank <- 1L
   intron_gr$type <- "exon"
   ## TODO: Revisit this
@@ -456,6 +465,5 @@ make_splici_txome <- function(gtf_path,
     GenomeInfoDb::seqlengths(x)
   )
   intron_gr <- GenomicRanges::trim(intron_gr)
-  
-  
+  intron_gr
 }
