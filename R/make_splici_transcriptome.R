@@ -2,9 +2,9 @@
 #'
 #' Construct the splici transcriptome for alevin-fry.
 #'
-#' @param gtf_path Character scalar providing the path to a gtf file.
 #' @param genome_path Character scalar providing the path to a genome fasta
 #'   file.
+#' @param gtf_path Character scalar providing the path to a gtf file.
 #' @param read_length Numeric scalar indicating the read length.
 #' @param flank_trim_length Numeric scalar giving the flank trimming length. The
 #'   final flank length is obtained by subtracting the \code{flank_trim_length}
@@ -86,34 +86,36 @@
 #' @export
 #'
 #' @return Nothing is returned, but the necessary files for the splici
-#'   transcriptome are written to the designated \code{output_dir}.
+#'   reference are written to the designated \code{output_dir}.
 #'
 #' @examples
 #' 
 #' library(roe)
 #' 
-#' gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
 #' genome_path <- system.file("extdata/small_example_genome.fa", package = "roe")
+#' gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
 #' extra_spliced = system.file("extdata/extra_spliced.txt", package = "roe")
 #' extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe")
 #' output_dir = tempdir()
 #' read_length=5
 #' flank_trim_length = 2
+#' filename_prefix = "transcriptome_splici"
 #' 
 #' # run the function
-#' make_splici_txome(gtf_path=gtf_path,
-#'                   genome_path=genome_path,
-#'                   read_length=read_length,
+#' make_splici_txome(genome_path = genome_path,
+#'                   gtf_path = gtf_path,
+#'                   read_length = read_length,
+#'                   output_dir = output_dir,
 #'                   flank_trim_length = flank_trim_length,
-#'                   output_dir=output_dir,
-#'                   extra_spliced=extra_spliced,
-#'                   extra_unspliced=extra_unspliced,
-#'                   dedup_seqs=FALSE
-#'                   # ,write_actual_flank=FALSE
+#'                   filename_prefix = filename_prefix,
+#'                   extra_spliced = extra_spliced,
+#'                   extra_unspliced = extra_unspliced,
+#'                   dedup_seqs = FALSE,
+#'                   no_flanking_merge = FALSE
 #' ) 
 #' 
 #' # grep the output filenames
-#' grep("transcriptome_splici", dir(outdir), value = TRUE)
+#' grep("transcriptome_splici", dir(output_dir), value = TRUE)
 #' 
 
 
@@ -122,7 +124,7 @@ make_splici_txome <- function(genome_path,
                               read_length,
                               output_dir,
                               flank_trim_length = 5,
-                              filename_prefix = "transcriptome_splici",
+                              filename_prefix = "splici",
                               extra_spliced = NULL,
                               extra_unspliced = NULL,
                               dedup_seqs = FALSE,
@@ -130,15 +132,15 @@ make_splici_txome <- function(genome_path,
                               # ,write_actual_flank=FALSE
                               ) {
   
-  suppressWarnings(.make_splici_txome(genome_path=genome_path,
-                                      gtf_path=gtf_path,
-                                      read_length=read_length,
+  suppressWarnings(.make_splici_txome(genome_path = genome_path,
+                                      gtf_path = gtf_path,
+                                      read_length = read_length,
                                       flank_trim_length = flank_trim_length,
-                                      output_dir=output_dir,
+                                      output_dir = output_dir,
                                       filename_prefix = filename_prefix,
-                                      extra_spliced=extra_spliced,
-                                      extra_unspliced=extra_unspliced
-                                      ,dedup_seqs=dedup_seqs,
+                                      extra_spliced = extra_spliced,
+                                      extra_unspliced = extra_unspliced,
+                                      dedup_seqs = dedup_seqs,
                                       no_flanking_merge = no_flanking_merge
                                       # ,write_actual_flank=FALSE
                                       )
@@ -164,7 +166,7 @@ make_splici_txome <- function(genome_path,
                                read_length,
                                output_dir,
                                flank_trim_length = 5,
-                               filename_prefix = "transcriptome_splici",
+                               filename_prefix = "splici",
                                extra_spliced = NULL,
                                extra_unspliced = NULL,
                                dedup_seqs = FALSE,
@@ -185,7 +187,7 @@ make_splici_txome <- function(genome_path,
   # make sure flank_length makes sense
   flank_length <- read_length - flank_trim_length
   if (flank_length < 0) {
-    stop("flank trim length is larger than read length!")
+    stop("flank trim length must be smaller than read length!")
   }
   # make sure gtf file exists
   if (!file.exists(gtf_path)) {
@@ -211,14 +213,14 @@ make_splici_txome <- function(genome_path,
   ############################################################################
   # Process gtf to get spliced and introns
   ############################################################################
-  message("============     processing gtf to get spliced and introns     ============")
+  message("Processing gtf to get spliced transcripts and introns...")
   grl <- suppressWarnings(eisaR::getFeatureRanges(
     gtf = file.path(gtf_path),
     featureType = c("spliced", "intron"),
     intronType = "separate",
     flankLength = 0,
     joinOverlappingIntrons = TRUE,
-    verbose = TRUE
+    verbose = FALSE
   ))
   
   ############################################################################
@@ -320,7 +322,7 @@ make_splici_txome <- function(genome_path,
   # extract sequences from genome
   ############################################################################
   
-  message("============extracting spliced and intron sequences from genome============")
+  message("Extracting spliced and intron sequences from the genome...")
   
   grl <- c(spliced_grl, intron_grl)
   
@@ -368,7 +370,7 @@ make_splici_txome <- function(genome_path,
   # optional: adding extra spliced and unspliced sequences from an fasta file
   if (!is.null(extra_spliced)) {
     if (!file.exists(extra_spliced)) {
-      warning("provided extra_sequences file does not exist, will ignore it")
+      warning("Provided extra_sequences file does not exist, ignored.")
     } else {
       fa <- file(extra_spliced, open = "r")
       lns <- readLines(fa)
@@ -401,7 +403,7 @@ make_splici_txome <- function(genome_path,
   
   if (!is.null(extra_unspliced)) {
     if (!file.exists(extra_unspliced)) {
-      warning("provided extra_sequences file does not exist, will ignore it")
+      warning("Provided extra_sequences file does not exist, ignored.")
     } else {
       fa <- file(extra_unspliced, open="r")
       lns <- readLines(fa)
