@@ -11,7 +11,7 @@
 #'   from the \code{read_length}.
 #' @param output_dir Character scalar indicating the output directory, where
 #'   the splici transcriptome files will be written.
-#' @param file_name_prefix Character scalar giving the file name prefix of the
+#' @param filename_prefix Character scalar giving the file name prefix of the
 #'   generated output files. The derived flank length will be automatically
 #'   appended to the provided prefix.
 #' @param extra_spliced Character scalar providing the path to a fasta file
@@ -20,7 +20,7 @@
 #'   with additional sequences to include among the unspliced ones.
 #' @param dedup_seqs Logical scalar indicating whether or not to remove
 #'   duplicate sequences.#' 
-#' @param pre_flanking_merge Logical scalar indicating whether or not to 
+#' @param no_flanking_merge Logical scalar indicating whether or not to 
 #'   merge overlapping introns caused by adding flanking length.
 #' @param write_actual_flank Logical scalar indicating whether or not to write
 #'   out the actual flank length (which may be shorter than the indicated one
@@ -79,7 +79,7 @@
 #' 
 #' He et al. (2021)
 #' Alevin-fry unlocks rapid, accurate, and memory-frugal quantification of single-cell RNA-seq data
-#' \url{https://www.biorxiv.org/content/10.1101/2021.06.29.450377v2}
+#' \url{https://www.nature.com/articles/s41592-022-01408-3}
 #' 
 #'
 #'
@@ -117,29 +117,29 @@
 #' 
 
 
-make_splici_txome <- function(gtf_path,
-                              genome_path,
+make_splici_txome <- function(genome_path,
+                              gtf_path,
                               read_length,
                               output_dir,
                               flank_trim_length = 5,
-                              file_name_prefix = "transcriptome_splici",
+                              filename_prefix = "transcriptome_splici",
                               extra_spliced = NULL,
                               extra_unspliced = NULL,
                               dedup_seqs = FALSE,
-                              pre_flanking_merge = FALSE
+                              no_flanking_merge = FALSE
                               # ,write_actual_flank=FALSE
                               ) {
   
-  suppressWarnings(.make_splici_txome(gtf_path=gtf_path,
-                                      genome_path=genome_path,
+  suppressWarnings(.make_splici_txome(genome_path=genome_path,
+                                      gtf_path=gtf_path,
                                       read_length=read_length,
                                       flank_trim_length = flank_trim_length,
                                       output_dir=output_dir,
-                                      file_name_prefix = file_name_prefix,
+                                      filename_prefix = filename_prefix,
                                       extra_spliced=extra_spliced,
                                       extra_unspliced=extra_unspliced
                                       ,dedup_seqs=dedup_seqs,
-                                      pre_flanking_merge = pre_flanking_merge
+                                      no_flanking_merge = no_flanking_merge
                                       # ,write_actual_flank=FALSE
                                       )
   )
@@ -159,16 +159,16 @@ make_splici_txome <- function(gtf_path,
 #' @importFrom dplyr %>% mutate
 #' @importFrom utils write.table
 
-.make_splici_txome <- function(gtf_path,
-                               genome_path,
+.make_splici_txome <- function(genome_path,
+                               gtf_path,
                                read_length,
+                               output_dir,
                                flank_trim_length = 5,
-                               output_dir = ".",
-                               file_name_prefix = "transcriptome_splici",
+                               filename_prefix = "transcriptome_splici",
                                extra_spliced = NULL,
                                extra_unspliced = NULL,
                                dedup_seqs = FALSE,
-                               pre_flanking_merge = FALSE
+                               no_flanking_merge = FALSE
                                # ,write_actual_flank=FALSE
                                ) {
   ## TODO: Add this sentence somewhere in the documentation:
@@ -197,10 +197,10 @@ make_splici_txome <- function(gtf_path,
   }
   
   # output file names
-  file_name_prefix <- paste0(file_name_prefix, "_fl", flank_length)
-  out_fa <- file.path(output_dir, paste0(file_name_prefix, ".fa"))
-  # out_t2g <- file.path(output_dir, paste0(file_name_prefix, "_t2g.tsv"))
-  out_t2g3col <- file.path(output_dir, paste0(file_name_prefix,
+  filename_prefix <- paste0(filename_prefix, "_fl", flank_length)
+  out_fa <- file.path(output_dir, paste0(filename_prefix, ".fa"))
+  # out_t2g <- file.path(output_dir, paste0(filename_prefix, "_t2g.tsv"))
+  out_t2g3col <- file.path(output_dir, paste0(filename_prefix,
                                               "_t2g_3col.tsv"))
   
   # load the genome sequence
@@ -236,7 +236,7 @@ make_splici_txome <- function(gtf_path,
   intron_idx <- names(grl) %in% S4Vectors::metadata(grl)$featurelist$intron
   intron_gr <- BiocGenerics::unlist(grl[intron_idx])
   # pre-flanking merge
-  if (pre_flanking_merge) {
+  if (no_flanking_merge) {
     intron_gr = .add_metadata(intron_gr, x = x)
   }
   
@@ -306,7 +306,7 @@ make_splici_txome <- function(gtf_path,
   #     )
   # 
   # }
-  if (!pre_flanking_merge) {  
+  if (!no_flanking_merge) {  
     intron_gr_flanked = .add_metadata(intron_gr_flanked, x=x)
   }
   
