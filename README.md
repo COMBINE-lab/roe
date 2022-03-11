@@ -7,7 +7,7 @@ The `roe` package provides useful functions for preparing input files required b
 
 1. preparing the *splici* reference for the `USA` mode of alevin-fry, which will export a unspliced, a spliced, and an ambiguous molecule count for each gene within each cell.
 
-## Installlation
+## Installation
 The `roe` package can be accessed from its [github repository](https://github.com/COMBINE-lab/roe). To install the `roe` package, start R and enter
 
 ```{r install_roe, eval=FALSE}
