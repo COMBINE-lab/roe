@@ -5,33 +5,34 @@
 \title{Construct splici transcriptome}
 \usage{
 make_splici_txome(
-  gtf_path,
   genome_path,
+  gtf_path,
   read_length,
-  flank_trim_length = 5,
   output_dir,
-  file_name_prefix = "transcriptome_splici",
+  flank_trim_length = 5,
+  filename_prefix = "splici",
   extra_spliced = NULL,
   extra_unspliced = NULL,
-  dedup_seqs = FALSE
+  dedup_seqs = FALSE,
+  no_flanking_merge = FALSE
 )
 }
 \arguments{
-\item{gtf_path}{Character scalar providing the path to a gtf file.}
-
 \item{genome_path}{Character scalar providing the path to a genome fasta
 file.}
 
+\item{gtf_path}{Character scalar providing the path to a gtf file.}
+
 \item{read_length}{Numeric scalar indicating the read length.}
+
+\item{output_dir}{Character scalar indicating the output directory, where
+the splici transcriptome files will be written.}
 
 \item{flank_trim_length}{Numeric scalar giving the flank trimming length. The
 final flank length is obtained by subtracting the \code{flank_trim_length}
 from the \code{read_length}.}
 
-\item{output_dir}{Character scalar indicating the output directory, where
-the splici transcriptome files will be written.}
-
-\item{file_name_prefix}{Character scalar giving the file name prefix of the
+\item{filename_prefix}{Character scalar giving the file name prefix of the
 generated output files. The derived flank length will be automatically
 appended to the provided prefix.}
 
@@ -42,7 +43,10 @@ with additional sequences to include among the spliced ones.}
 with additional sequences to include among the unspliced ones.}
 
 \item{dedup_seqs}{Logical scalar indicating whether or not to remove
-duplicate sequences.}
+duplicate sequences.#'}
+
+\item{no_flanking_merge}{Logical scalar indicating whether or not to 
+merge overlapping introns caused by adding flanking length.}
 
 \item{write_actual_flank}{Logical scalar indicating whether or not to write
 out the actual flank length (which may be shorter than the indicated one
@@ -51,7 +55,7 @@ This argument is currently under development.}
 }
 \value{
 Nothing is returned, but the necessary files for the splici
-  transcriptome are written to the designated \code{output_dir}.
+  reference are written to the designated \code{output_dir}.
 }
 \description{
 Construct the splici transcriptome for alevin-fry.
@@ -101,28 +105,30 @@ We are currently exploring the optimal implementation of this enhancement.
 
 library(roe)
 
-gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
 genome_path <- system.file("extdata/small_example_genome.fa", package = "roe")
+gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
 extra_spliced = system.file("extdata/extra_spliced.txt", package = "roe")
 extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe")
 output_dir = tempdir()
 read_length=5
 flank_trim_length = 2
+filename_prefix = "transcriptome_splici"
 
 # run the function
-make_splici_txome(gtf_path=gtf_path,
-                  genome_path=genome_path,
-                  read_length=read_length,
+make_splici_txome(genome_path = genome_path,
+                  gtf_path = gtf_path,
+                  read_length = read_length,
+                  output_dir = output_dir,
                   flank_trim_length = flank_trim_length,
-                  output_dir=output_dir,
-                  extra_spliced=extra_spliced,
-                  extra_unspliced=extra_unspliced,
-                  dedup_seqs=FALSE
-                  # ,write_actual_flank=FALSE
+                  filename_prefix = filename_prefix,
+                  extra_spliced = extra_spliced,
+                  extra_unspliced = extra_unspliced,
+                  dedup_seqs = FALSE,
+                  no_flanking_merge = FALSE
 ) 
 
 # grep the output filenames
-grep("transcriptome_splici", dir(outdir), value = TRUE)
+grep("transcriptome_splici_fl", dir(output_dir), value = TRUE)
 
 }
 \references{
@@ -132,7 +138,7 @@ Alignment and mapping methodology influence transcript abundance estimation
 
 He et al. (2021)
 Alevin-fry unlocks rapid, accurate, and memory-frugal quantification of single-cell RNA-seq data
-\url{https://www.biorxiv.org/content/10.1101/2021.06.29.450377v2}
+\url{https://www.nature.com/articles/s41592-022-01408-3}
 }
 \author{
 Dongze He
