@@ -59,19 +59,31 @@ The USA mode in alevin-fry requires a special index reference, which is called t
 Following is an example of calling the `make_splici_txome()` to make the *splici* index reference. The final flank length is calculated as the difference between the read length and the flank_trim_length, i.e., $5-2=3$. This function allows you to add extra spliced and unspliced sequences to the *splici* index, which will be useful when some unannotated sequences, such as mitochondrial genes, are important for your experiment. 
 
 ```{r}
-outdir <- tempdir()
-make_splici_txome(
-  gtf_path = system.file("extdata/small_example.gtf", package = "roe"),
-  genome_path = system.file("extdata/small_example_genome.fa", package = "roe"),
-  read_length = 5,
-  flank_trim_length = 2,
-  output_dir = outdir,
-  file_name_prefix = "transcriptome_splici",
-  extra_spliced = system.file("extdata/extra_spliced.txt", package = "roe"),
-  extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe"),
-  dedup_seqs = FALSE
-)
-grep("transcriptome_splici", dir(outdir), value = TRUE)
+genome_path <- system.file("extdata/small_example_genome.fa", package = "roe")
+gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
+extra_spliced = system.file("extdata/extra_spliced.txt", package = "roe")
+extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe")
+output_dir = tempdir()
+read_length=5
+flank_trim_length = 2
+filename_prefix = "transcriptome_splici"
+
+# run the function
+make_splici_txome(genome_path = genome_path,
+                  gtf_path = gtf_path,
+                  read_length = read_length,
+                  output_dir = output_dir,
+                  flank_trim_length = flank_trim_length,
+                  filename_prefix = filename_prefix,
+                  extra_spliced = extra_spliced,
+                  extra_unspliced = extra_unspliced,
+                  dedup_seqs = FALSE,
+                  no_flanking_merge = FALSE
+) 
+
+# grep the output filenames
+grep("transcriptome_splici_fl", dir(output_dir), value = TRUE)
+
 ```
 
 The `make_splici_txome()` function has no returned value, but writes three files to your specified output directory `output_dir`. They are 
