@@ -99,7 +99,7 @@
 #' output_dir = tempdir()
 #' read_length=5
 #' flank_trim_length = 2
-#' filename_prefix = "transcriptome_splici_fl"
+#' filename_prefix = "transcriptome_splici"
 #' 
 #' # run the function
 #' make_splici_txome(genome_path = genome_path,
@@ -124,7 +124,7 @@ make_splici_txome <- function(genome_path,
                               read_length,
                               output_dir,
                               flank_trim_length = 5,
-                              filename_prefix = "splici_fl",
+                              filename_prefix = "splici",
                               extra_spliced = NULL,
                               extra_unspliced = NULL,
                               dedup_seqs = FALSE,
@@ -166,7 +166,7 @@ make_splici_txome <- function(genome_path,
                                read_length,
                                output_dir,
                                flank_trim_length = 5,
-                               filename_prefix = "splici_fl",
+                               filename_prefix = "splici",
                                extra_spliced = NULL,
                                extra_unspliced = NULL,
                                dedup_seqs = FALSE,
