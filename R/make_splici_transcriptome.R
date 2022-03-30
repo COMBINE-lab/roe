@@ -214,14 +214,15 @@ make_splici_txome <- function(genome_path,
   # Process gtf to get spliced and introns
   ############################################################################
   message("Processing gtf to get spliced transcripts and introns...")
-  grl <- suppressWarnings(eisaR::getFeatureRanges(
-    gtf = file.path(gtf_path),
-    featureType = c("spliced", "intron"),
-    intronType = "separate",
-    flankLength = 0,
-    joinOverlappingIntrons = TRUE,
-    verbose = FALSE
-  ))
+  suppressWarnings({
+    grl <- eisaR::getFeatureRanges(
+      gtf = file.path(gtf_path),
+      featureType = c("spliced", "intron"),
+      intronType = "separate",
+      flankLength = 0,
+      joinOverlappingIntrons = TRUE,
+      verbose = FALSE)
+  })
   
   ############################################################################
   # Get spliced related stuff
@@ -327,12 +328,11 @@ make_splici_txome <- function(genome_path,
   grl <- c(spliced_grl, intron_grl)
   
   # make sure introns don't out of boundary
-  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(x)
-  GenomeInfoDb::seqlengths(grl) <- suppressWarnings(
-    GenomeInfoDb::seqlengths(x)
-  )
-  grl <- GenomicRanges::trim(grl)
-  
+  suppressWarnings({
+    GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(x)
+    GenomeInfoDb::seqlengths(grl) <- GenomeInfoDb::seqlengths(x)
+    grl <- GenomicRanges::trim(grl)
+  })
   seqs <- GenomicFeatures::extractTranscriptSeqs(
     x = x,
     transcripts = grl
