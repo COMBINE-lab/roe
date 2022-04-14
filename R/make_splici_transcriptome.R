@@ -110,7 +110,7 @@
 #'                   filename_prefix = filename_prefix,
 #'                   extra_spliced = extra_spliced,
 #'                   extra_unspliced = extra_unspliced,
-#'                   dedup_seqs = FALSE,
+#'                   dedup_seqs = TRUE,
 #'                   no_flanking_merge = FALSE
 #' ) 
 #' 
