@@ -17,7 +17,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 # Install eisaR
-BiocManager::install(c("eisaR","BSgenome"))
+BiocManager::install(c("eisaR","BSgenome","fishpond"))
 
 # install roe from github
 if (!requireNamespace("devtools", quietly = TRUE))

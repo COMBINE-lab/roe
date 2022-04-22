@@ -29,50 +29,49 @@ test_that("multiplication works", {
 
 # Some of the tests are taken from eisaR https://bioconductor.org/packages/release/bioc/html/eisaR.html
 
-context("Reference generation")
+# context("Reference generation")
 
 library(roe)
 library(BSgenome)
+library(GenomicFeatures)
+library(Biostrings)
 
 
 gtf_path <- system.file("extdata/small_example.gtf", package = "roe")
 genome_path <- system.file("extdata/small_example_genome.fa", package = "roe")
-extra_spliced = system.file("extdata/extra_spliced.txt", package = "roe")
-extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe")
-output_dir = tempdir()
-read_length=5
-flank_trim_length = 2
+extra_spliced <- system.file("extdata/extra_spliced.txt", package = "roe")
+extra_unspliced <- system.file("extdata/extra_unspliced.txt", package = "roe")
+output_dir <- tempdir()
+read_length <- 5
+flank_trim_length <- 2
 
 test_that("expected files are written", {
-    
+
     # create simulated genome
-    genome <- Biostrings::DNAStringSet(
-      c(chr1 = "TTAACATTCGCTGGGGGAGATGACGAGACTAGCCGCCGCGTGGTCCTGCCGCATTATACGTGTTCAAGCGCCTACGTGGGTTGGGCAACCCGTGCCTATGGAGGCATGGACAAATTAGGTTCAACTTCAGCTACGTACGAGACCTAGAGGTAATAAGGGTATTTTACTCGGAGCATGTTTCAGTACGAACGTTAGATATC",
-        chr2 = "CTATCGAAGTGGAATCTTGAAGAGCCCATCGGTTAAGGTCTCTCCAATGTCCAGCCTATTCTATGGCACGGCAGACCCGTTGTGCATCCACAGTGATAACTTACTTGGGCTCTTAATAGAGGAGTGTTGCCATTTTATCGGCTTGCACTCCAATTAGCACCAAGTGCCGTTATTGGGGTATTGCACTCATCAATAGCGTG")
-    )
+    genome <- Biostrings::readDNAStringSet(file.path(genome_path))
     genome_revcompl <- Biostrings::reverseComplement(genome)
     chr1 = as.character(genome[["chr1"]])
     chr2_rev = as.character(genome_revcompl[["chr2"]])
-    
+
     # run the function
-    make_splici_txome(gtf_path=gtf_path,
-                      genome_path=genome_path,
-                      read_length=read_length,
+    make_splici_txome(gtf_path = gtf_path,
+                      genome_path = genome_path,
+                      read_length = read_length,
                       flank_trim_length = flank_trim_length,
-                      output_dir=output_dir,
-                      extra_spliced=extra_spliced,
-                      extra_unspliced=extra_unspliced,
-                      dedup_seqs=FALSE
+                      output_dir = output_dir,
+                      extra_spliced = extra_spliced,
+                      extra_unspliced = extra_unspliced,
+                      dedup_seqs = FALSE
                       # ,write_actual_flank=FALSE
-                      ) 
-    
+                      )
+
     # harvest the output
-    splici_seqs = readBStringSet(file.path(output_dir, "transcriptome_splici_fl3.fa"))
-    t2g_3col = read.csv(file.path(output_dir, "transcriptome_splici_fl3_t2g_3col.tsv"),header = FALSE, sep = "\t")
-    t2g = read.csv(file.path(output_dir, "transcriptome_splici_fl3_t2g.tsv"),header = FALSE, sep = "\t")
+    splici_seqs = readBStringSet(file.path(output_dir, "splici_fl3.fa"))
+    t2g_3col = read.csv(file.path(output_dir, "splici_fl3_t2g_3col.tsv"),header = FALSE, sep = "\t")
+    # t2g = read.csv(file.path(output_dir, "splici_fl3_t2g.tsv"),header = FALSE, sep = "\t")
     
     # Define expected sequences
-    ## For each gene, 
+    ## For each gene,
     ### we have 3 spliced txps.
     #### txp1 ([1,2], [36, 45], [71,80]), with intron regions ([3,35], [46,70])
     #### txp2 ([46,55], [91, 100]), with intron ([56,90])
@@ -85,84 +84,177 @@ test_that("expected files are written", {
     #### I1: [1,38]
     #### I2: [43,93]
     #### I3: [128,193]
-    
+
     # Check extracted sequences
     # check txp1.1
-    expect_equal(as.character(splici_seqs[["tx1.1"]]), paste0(substr(chr1, 1,2), substr(chr1, 36,45), substr(chr1, 71,80)))
-    
+    tx1.1 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr1"), 3),
+                      ranges = IRanges(c(1, 36, 71), end = c(2, 45, 80)),
+                      strand = Rle(strand(c("+")), 3)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["tx1.1"]]),
+                  paste(as.character(tx1.1), collapse = ""))
+
     # check txp1.2
-    expect_equal(as.character(splici_seqs[["tx1.2"]]), paste0(substr(chr1, 46,55), substr(chr1, 91,100)))
-    
+    tx1.2 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr1"), 2),
+                      ranges = IRanges(c(46, 91), end = c(55, 100)),
+                      strand = Rle(strand(c("+")), 2)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["tx1.2"]]),
+                  paste(as.character(tx1.2), collapse = ""))
+
     # check txp1.3
-    expect_equal(as.character(splici_seqs[["tx1.3"]]), paste0(substr(chr1, 121,130), substr(chr1, 156,160), substr(chr1, 191,200)))
-    
+    tx1.3 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr1"), 3),
+                      ranges = IRanges(c(121, 156, 191),
+                                        end = c(130, 160, 200)),
+                      strand = Rle(strand(c("+")), 3)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["tx1.3"]]),
+                  paste(as.character(tx1.3), collapse = ""))
+
     # check txp2.1
-    expect_equal(as.character(splici_seqs[["tx2.1"]]), paste0(substr(chr2_rev, 1,2), substr(chr2_rev, 36,45), substr(chr2_rev, 71,80)))
-    
+    tx2.1 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr2"), 3),
+                      ranges = IRanges(c(1, 36, 71), end = c(2, 45, 80)),
+                      strand = Rle(strand(c("-")), 3)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["tx2.1"]]),
+                  paste(rev(as.character(tx2.1)), collapse = ""))
+
     # check txp2.2
-    expect_equal(as.character(splici_seqs[["tx2.2"]]), paste0(substr(chr2_rev, 46,55), substr(chr2_rev, 91,100)))
-    
+    tx2.2 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr2"), 2),
+                      ranges = IRanges(c(46, 91), end = c(55, 100)),
+                      strand = Rle(strand(c("-")), 2)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["tx2.2"]]),
+                  paste(rev(as.character(tx2.2)), collapse = ""))
+
     # check txp2.3
-    expect_equal(as.character(splici_seqs[["tx2.3"]]), paste0(substr(chr2_rev, 121,130), substr(chr2_rev, 156,160), substr(chr2_rev, 191,200)))
-    
+    tx2.3 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr2"), 3),
+                      ranges = IRanges(c(121, 156, 191),
+                                        end = c(130, 160, 200)),
+                      strand = Rle(strand(c("-")), 3)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["tx2.3"]]), 
+                  paste(rev(as.character(tx2.3)), collapse = ""))
+
     # check g1-I
-    expect_equal(as.character(splici_seqs[["g1-I"]]), paste0(substr(chr1, 1,38)))
-    
+    g1_I <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr1"), 1),
+                      ranges = IRanges(1, end = 38),
+                      strand = Rle(strand(c("+")), 1)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["g1-I"]]),
+                  as.character(g1_I))
+
     # check g1-I1
-    expect_equal(as.character(splici_seqs[["g1-I1"]]), paste0(substr(chr1, 43,93)))
-    
+    g1_I1 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr1"), 1),
+                      ranges = IRanges(43, end = 93),
+                      strand = Rle(strand(c("+")), 1)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["g1-I1"]]),
+                  as.character(g1_I1))
+
     # check g1-I2
-    expect_equal(as.character(splici_seqs[["g1-I2"]]), paste0(substr(chr1, 128,193)))
-    
+    g1_I2 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr1"), 1),
+                      ranges = IRanges(128, end = 193),
+                      strand = Rle(strand(c("+")), 1)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["g1-I2"]]),
+                  as.character(g1_I2))
+
     # check g2-I
-    expect_equal(as.character(splici_seqs[["g2-I"]]), paste0(substr(chr2_rev, 163,200)))
-    
+    g2_I <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr2"), 1),
+                      ranges = IRanges(1, end = 38),
+                      strand = Rle(strand(c("-")), 1)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["g2-I"]]),
+                  as.character(g2_I))
+
     # check g2-I1
-    expect_equal(as.character(splici_seqs[["g2-I1"]]), paste0(substr(chr2_rev, 108,158)))
-    
+    g2_I1 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr2"), 1),
+                      ranges = IRanges(43, end = 93),
+                      strand = Rle(strand(c("-")), 1)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["g2-I1"]]),
+                  as.character(g2_I1))
+
     # check g2-I2
-    expect_equal(as.character(splici_seqs[["g2-I2"]]), paste0(substr(chr2_rev, 8,73)))
-    
-    
+    g2_I2 <- getSeq(x = genome,
+                    GRanges(
+                      seqnames = Rle(c("chr2"), 1),
+                      ranges = IRanges(128, end = 193),
+                      strand = Rle(strand(c("-")), 1)
+                      )
+    )
+    expect_equal(as.character(splici_seqs[["g2-I2"]]), as.character(g2_I2))
+
     # Check t2g records
-    ## t2g records are sorted, so it will be 
+    ## t2g records are sorted, so it will be
     ### g1's txps: tx1.1, tx1.2, tx1.3
     ### g2's txps:  tx2.1, tx2.2, tx2.3
     ### g1's introns:  g1-I, g1-I1, g1-I2
     ### g2's introns:  g2-I, g2-I1, g2-I2
-    
+
     ## the first column of t2g file stores txp names
 
-    expect_equal(t2g_3col$V1, c( "tx1.1","tx1.2","tx1.3",
-                                 "tx2.1","tx2.2","tx2.3",
-                                 "g1-I","g1-I1","g1-I2",
-                                 "g2-I","g2-I1","g2-I2",
-                                 "ExtraSpliced","ExtraUnspliced"
-                                 )
-                 )
+    expect_equal(t2g_3col$V1, c( "tx1.1", "tx1.2", "tx1.3",
+                                  "tx2.1", "tx2.2", "tx2.3",
+                                  "g1-I", "g1-I1", "g1-I2",
+                                  "g2-I", "g2-I1", "g2-I2",
+                                  "ExtraSpliced", "ExtraUnspliced"
+                                  )
+                )
     
     
     
     ## the second column of t2g file stores gene names plus types (either txp, introns(-I) or unspliced(-U))
 
-    expect_equal(t2g_3col$V2, c("g1","g1","g1",
-                                "g2","g2","g2",
-                                "g1-I","g1-I","g1-I",
-                                "g2-I","g2-I","g2-I",
-                                "ExtraSpliced","ExtraUnspliced-U"
+    expect_equal(t2g_3col$V2, c("g1", "g1", "g1",
+                                "g2", "g2", "g2",
+                                "g1", "g1", "g1",
+                                "g2", "g2", "g2",
+                                "ExtraSpliced", "ExtraUnspliced"
                                 )
-                 )
-    
+                )
+
     ## the third column of t2g_3col file stores the splicing status of each record, either unspliced (U) or spliced (S)
-    expect_equal(t2g_3col$V3, c("S","S","S",
-                                "S","S","S",
-                                "U","U","U",
-                                "U","U","U",
-                                "S","U",
+    expect_equal(t2g_3col$V3, c("S", "S", "S",
+                                "S", "S", "S",
+                                "U", "U", "U",
+                                "U", "U", "U",
+                                "S", "U"
                                 )
-                 )
+                )
 
 })
-
-
-

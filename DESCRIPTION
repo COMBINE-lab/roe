@@ -1,18 +1,16 @@
 Package: roe
 Type: Package
 Title: R utilities for alevin-fry
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(person("Charlotte", "Soneson", 
                     role = c("aut"), email = "charlottesoneson@gmail.com", 
                     comment = c(ORCID = "0000-0003-3833-2169")),
-             person("Dongze", "He", email = "dhe17@umd.edu", 
+            person("Dongze", "He", email = "dhe17@umd.edu", 
                     role = c("cre", "aut")))
 Description: Provides R utilities for alevin-fry.
-License: BSD 3-clause
+License: BSD_3_clause + file LICENSE
 Encoding: UTF-8
 LazyData: false
-URL: https://github.com/COMBINE-lab/roe
-BugReports: https://github.com/COMBINE-lab/roe/issues
 Imports: 
     Biobase,
     BiocGenerics,
@@ -26,7 +24,8 @@ Imports:
     rlang,
     S4Vectors,
     stringr,
-    utils
+    utils,
+    fishpond
 RoxygenNote: 7.1.2
 Suggests: 
     rmarkdown,
@@ -34,3 +33,8 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
+URL: https://github.com/COMBINE-lab/roe
+BugReports: https://github.com/COMBINE-lab/roe/issues
+

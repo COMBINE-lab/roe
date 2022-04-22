@@ -22,10 +22,7 @@
 #'   duplicate sequences.#' 
 #' @param no_flanking_merge Logical scalar indicating whether or not to 
 #'   merge overlapping introns caused by adding flanking length.
-#' @param write_actual_flank Logical scalar indicating whether or not to write
-#'   out the actual flank length (which may be shorter than the indicated one
-#'   if the latter would mean going outside the gene boundaries). 
-#'   This argument is currently under development. 
+#' @param quiet logical whether to display no messages
 #'
 #' @author Dongze He
 #'
@@ -128,10 +125,10 @@ make_splici_txome <- function(genome_path,
                               extra_spliced = NULL,
                               extra_unspliced = NULL,
                               dedup_seqs = FALSE,
-                              no_flanking_merge = FALSE
-                              # ,write_actual_flank=FALSE
+                              no_flanking_merge = FALSE,
+                              quiet = FALSE
                               ) {
-  
+
   suppressWarnings(.make_splici_txome(genome_path = genome_path,
                                       gtf_path = gtf_path,
                                       read_length = read_length,
@@ -141,8 +138,8 @@ make_splici_txome <- function(genome_path,
                                       extra_spliced = extra_spliced,
                                       extra_unspliced = extra_unspliced,
                                       dedup_seqs = dedup_seqs,
-                                      no_flanking_merge = no_flanking_merge
-                                      # ,write_actual_flank=FALSE
+                                      no_flanking_merge = no_flanking_merge,
+                                      quiet = FALSE
                                       )
   )
 }
@@ -162,27 +159,29 @@ make_splici_txome <- function(genome_path,
 #' @importFrom utils write.table
 
 .make_splici_txome <- function(genome_path,
-                               gtf_path,
-                               read_length,
-                               output_dir,
-                               flank_trim_length = 5,
-                               filename_prefix = "splici",
-                               extra_spliced = NULL,
-                               extra_unspliced = NULL,
-                               dedup_seqs = FALSE,
-                               no_flanking_merge = FALSE
-                               # ,write_actual_flank=FALSE
-                               ) {
+                                gtf_path,
+                                read_length,
+                                output_dir,
+                                flank_trim_length = 5,
+                                filename_prefix = "splici",
+                                extra_spliced = NULL,
+                                extra_unspliced = NULL,
+                                dedup_seqs = FALSE,
+                                no_flanking_merge = FALSE,
+                                quiet = FALSE
+                                ) {
   ## TODO: Add this sentence somewhere in the documentation:
-  # flank trim length is used to avoid marginal case when dealing with junctional reads
-  
+  # flank trim length is used to avoid marginal case when
+  # dealing with junctional reads
+
   ############################################################################
   # Preprocessing
   ############################################################################
   
+  .say(quiet, "- Locating required files...")
   if (!dir.exists(output_dir)) {
     dir.create(file.path(output_dir), recursive = TRUE,
-               showWarnings = FALSE)
+                showWarnings = FALSE)
   }
   # make sure flank_length makes sense
   flank_length <- read_length - flank_trim_length
@@ -197,25 +196,26 @@ make_splici_txome <- function(genome_path,
   if (!file.exists(genome_path)) {
     stop("The following file does not exist: \n", genome_path)
   }
-  
+
   # output file names
   filename_prefix <- paste0(filename_prefix, "_fl", flank_length)
   out_fa <- file.path(output_dir, paste0(filename_prefix, ".fa"))
   # out_t2g <- file.path(output_dir, paste0(filename_prefix, "_t2g.tsv"))
   out_t2g3col <- file.path(output_dir, paste0(filename_prefix,
                                               "_t2g_3col.tsv"))
-  
+  .say(quiet, "- Generating spliced transcripts and introns...")
+
+  .say(quiet, "  - Loading the provided genome and gene annotations")
   # load the genome sequence
   x <- Biostrings::readDNAStringSet(file.path(genome_path))
   # get the first word as the name
   names(x) <- stringr::word(names(x), 1)
-  
+
   ############################################################################
   # Process gtf to get spliced and introns
   ############################################################################
-  message("Processing gtf to get spliced transcripts and introns...")
   suppressWarnings({
-    grl <- eisaR::getFeatureRanges(
+    grl <- getFeatureRanges(
       gtf = file.path(gtf_path),
       featureType = c("spliced", "intron"),
       intronType = "separate",
@@ -223,18 +223,20 @@ make_splici_txome <- function(genome_path,
       joinOverlappingIntrons = TRUE,
       verbose = FALSE)
   })
-  
+
   ############################################################################
   # Get spliced related stuff
   ############################################################################
-  
+
+  .say(quiet, "  - Processing spliced transcripts")
   spliced_idx <- names(grl) %in% S4Vectors::metadata(grl)$featurelist$spliced
   spliced_grl <- grl[spliced_idx]
-  
+
   ############################################################################
   # Get reduced introns
   ############################################################################
-  
+  .say(quiet, "  - Processing introns")
+
   # identify all introns and convert to GRanges
   intron_idx <- names(grl) %in% S4Vectors::metadata(grl)$featurelist$intron
   intron_gr <- BiocGenerics::unlist(grl[intron_idx])
@@ -245,88 +247,24 @@ make_splici_txome <- function(genome_path,
   
   # add flanking length to each side
   intron_gr_flanked = intron_gr + flank_length
-  
-  # This functionality hasn't been complished yet, will not expose
-  ## also make sure flanked introns are within chromosome boundary
-  # GenomeInfoDb::seqlevels(intron_gr_flanked) <- GenomeInfoDb::seqlevels(x)
-  # GenomeInfoDb::seqlengths(intron_gr_flanked) <- suppressWarnings(
-  #     GenomeInfoDb::seqlengths(x)
-  # )
-  # intron_gr_flanked <- GenomicRanges::trim(intron_gr_flanked)
-  
-  # if (write_actual_flank) {
-  #     # next ensure flanked introns are within gene boundary
-  #     ## first load gene ranges from GTF
-  #     txdb <- GenomicFeatures::makeTxDbFromGFF(gtf_path, format = "gtf")
-  #     gs <- GenomicFeatures::genes(txdb)
-  # 
-  #     ## grab relative gene range info into a matrix
-  #     grs <- cbind(gs$gene_id, BiocGenerics::start(gs), BiocGenerics::end(gs))
-  #     colnames(grs) <- c("gene_id", "gene_start", "gene_end")
-  #     rownames(grs) <- grs[, "gene_id"]
-  # 
-  #     ## grab relative introns and flanked introns range info into another matrix
-  #     trs <- cbind(intron_gr_flanked$exon_id,
-  #                  BiocGenerics::start(intron_gr),
-  #                  BiocGenerics::end(intron_gr),
-  #                  BiocGenerics::start(intron_gr_flanked),
-  #                  BiocGenerics::end(intron_gr_flanked),
-  #                  sapply(strsplit(intron_gr_flanked$exon_id, "-",
-  #                                  fixed = TRUE), .subset, 1), "NA")
-  #     colnames(trs) <- c("intron_id", "intron_start", "intron_end",
-  #                        "flanked_start", "flanked_end", "gene_id")
-  #     rownames(trs) <- trs[, "intron_id"]
-  # 
-  #     ## merge gene range info and intron range info matrix
-  #     trs <- cbind(trs, grs[trs[, "gene_id"], , drop = FALSE])
-  #     trs <- trs[, !(colnames(trs) %in% c("intron_id", "gene_id"))]
-  #     class(trs) <- "numeric"
-  # 
-  #     ## correct out-of-boundary flanking initial positions and terminal positions
-  #     trs[, "flanked_start"] <- Biobase::rowMax(trs[, c("flanked_start",
-  #                                                       "gene_start")])
-  #     trs[, "flanked_end"] <- Biobase::rowMin(trs[, c("flanked_end",
-  #                                                     "gene_end")])
-  # 
-  #     ## calculate the actual flanking length attached to each side of each
-  #     intron_flank_length <- cbind(
-  #         rownames(trs),
-  #         trs[, "intron_start"] - trs[, "flanked_start"] + 1,
-  #         trs[, "flanked_end"] - trs[, "intron_end"] + 1
-  #     )
-  #     colnames(intron_flank_length) <- c("intron_name",
-  #                                        "initial_flank_length",
-  #                                        "terminal_flank_length")
-  # 
-  # 
-  #     utils::write.table(
-  #         intron_flank_length,
-  #         file = file.path(output_dir, "intron_flank_length.tsv"),
-  #         row.names = FALSE,
-  #         col.names = TRUE,
-  #         quote = FALSE,
-  #         sep = "\t"
-  #     )
-  # 
-  # }
+
   if (!no_flanking_merge) {  
     intron_gr_flanked = .add_metadata(intron_gr_flanked, x=x)
   }
   
   # remake intron GRangesList
-  intron_grl <- BiocGenerics::relist(intron_gr_flanked, lapply(
-    structure(seq_along(intron_gr_flanked),
-              names = intron_gr_flanked$transcript_id), function(i) i))
+  intron_grl <- BiocGenerics::relist(intron_gr_flanked, 
+                                    lapply(structure(seq_along(intron_gr_flanked),
+                                    names = intron_gr_flanked$transcript_id), function(i) i))
   
   
   ############################################################################
   # extract sequences from genome
   ############################################################################
-  
-  message("Extracting spliced and intron sequences from the genome...")
+  .say(quiet, "  - Extracting sequences from the genome")
   
   grl <- c(spliced_grl, intron_grl)
-  
+
   # make sure introns don't out of boundary
   suppressWarnings({
     GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(x)
@@ -350,8 +288,9 @@ make_splici_txome <- function(genome_path,
   ############################################################################
   # process final outputs
   ############################################################################
-  message("Writing outputs...")
-  
+  .say(quiet, "- Writing outputs")
+
+
   df <- eisaR::getTx2Gene(grl)
   # utils::write.table(df, out_t2g, sep = "\t", row.names = FALSE,
   #                    quote = FALSE, col.names = FALSE)
@@ -360,17 +299,19 @@ make_splici_txome <- function(genome_path,
     dplyr::mutate(gene_id = stringr::word(.data$gene_id, 1, sep = '-'),
                   status = ifelse(stringr::str_detect(.data$transcript_id, '-'),
                                   'U', 'S'))
-  
+  .say(quiet, "  - Writing spliced and intron sequences")
+
   Biostrings::writeXStringSet(seqs, out_fa, format = "fasta")
   utils::write.table(df, out_t2g3col
-                     , sep = "\t",
-                     row.names = FALSE, quote = FALSE, col.names = FALSE)
-
+                      , sep = "\t",
+                      row.names = FALSE, quote = FALSE, col.names = FALSE)
 
   # optional: adding extra spliced and unspliced sequences from an fasta file
   if (!is.null(extra_spliced)) {
+    .say(quiet, "  - Appending extra spliced sequences")
+
     if (!file.exists(extra_spliced)) {
-      warning("Provided extra_sequences file does not exist, ignored.")
+      warning("  - Provided extra_sequences file does not exist, ignored.")
     } else {
       fa <- file(extra_spliced, open = "r")
       lns <- readLines(fa)
@@ -385,25 +326,27 @@ make_splici_txome <- function(genome_path,
           #                    col.names = FALSE, append = TRUE)
           utils::write.table(matrix(c(txp_name, txp_name, "S"),
                                     nrow = 1),
-                             file = out_t2g3col, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+                              file = out_t2g3col, sep = "\t",
+                              row.names = FALSE, quote = FALSE,
+                              col.names = FALSE, append = TRUE)
           utils::write.table(ln, file = out_fa, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
-        } else {
+                              row.names = FALSE, quote = FALSE,
+                              col.names = FALSE, append = TRUE)
+          } else {
           # if not a header, just write to fasta file
           utils::write.table(ln, file = out_fa, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+                              row.names = FALSE, quote = FALSE,
+                              col.names = FALSE, append = TRUE)
         }
       }
     }
   }
-  
+
   if (!is.null(extra_unspliced)) {
+    .say(quiet, "  - Appending extra unspliced sequences")
+
     if (!file.exists(extra_unspliced)) {
-      warning("Provided extra_sequences file does not exist, ignored.")
+      warning("  - Provided extra_sequences file does not exist, ignored.")
     } else {
       fa <- file(extra_unspliced, open="r")
       lns <- readLines(fa)
@@ -420,30 +363,30 @@ make_splici_txome <- function(genome_path,
           #                    col.names = FALSE, append = TRUE)
           utils::write.table(matrix(c(txp_name, txp_name, "U"),
                                     nrow = 1),
-                             file = out_t2g3col, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+                              file = out_t2g3col, sep = "\t",
+                              row.names = FALSE, quote = FALSE,
+                              col.names = FALSE, append = TRUE)
           utils::write.table(ln, file = out_fa, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+                              row.names = FALSE, quote = FALSE,
+                              col.names = FALSE, append = TRUE)
         } else {
           # if not a header, just write to fasta file
           utils::write.table(ln, file = out_fa, sep = "\t",
-                             row.names = FALSE, quote = FALSE,
-                             col.names = FALSE, append = TRUE)
+                              row.names = FALSE, quote = FALSE,
+                              col.names = FALSE, append = TRUE)
         }
       }
     }
   }
-  
-  message("Done.")
+  .say(quiet, "Done")
+
 }
 
 # This function takes a GRanage object and its genome, then returns
 .add_metadata <- function(intron_gr, x) {
   # group introns by gene, then collapse overlapping ranges
   intron_grl <- GenomicRanges::reduce(S4Vectors::split(intron_gr,
-                                                       intron_gr$gene_id))
+                                                        intron_gr$gene_id))
   intron_gr <- BiocGenerics::unlist(intron_grl)
 
   # clean txp names and gene names
@@ -460,7 +403,7 @@ make_splici_txome <- function(genome_path,
   S4Vectors::mcols(intron_gr) <-
     S4Vectors::mcols(intron_gr)[, c("exon_id", "exon_rank",
                                     "transcript_id", "gene_id", "type")]
-  
+
   # make sure intron ranges are within chromosome boundary
   GenomeInfoDb::seqlevels(intron_gr) <- GenomeInfoDb::seqlevels(x)
   GenomeInfoDb::seqlengths(intron_gr) <- suppressWarnings(

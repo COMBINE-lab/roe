@@ -14,7 +14,8 @@ make_splici_txome(
   extra_spliced = NULL,
   extra_unspliced = NULL,
   dedup_seqs = FALSE,
-  no_flanking_merge = FALSE
+  no_flanking_merge = FALSE,
+  quiet = FALSE
 )
 }
 \arguments{
@@ -48,10 +49,7 @@ duplicate sequences.#'}
 \item{no_flanking_merge}{Logical scalar indicating whether or not to 
 merge overlapping introns caused by adding flanking length.}
 
-\item{write_actual_flank}{Logical scalar indicating whether or not to write
-out the actual flank length (which may be shorter than the indicated one
-if the latter would mean going outside the gene boundaries). 
-This argument is currently under development.}
+\item{quiet}{logical whether to display no messages}
 }
 \value{
 Nothing is returned, but the necessary files for the splici
