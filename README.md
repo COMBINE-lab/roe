@@ -6,7 +6,7 @@
 The `roe` package provides useful functions for preparing input files required by `alevin-fry`, which consists of
 
 1. preparing the *splici* reference for the `USA` mode of alevin-fry, which will export a unspliced, a spliced, and an ambiguous molecule count for each gene within each cell.
-
+2. downloading the preprocessed quantification result of the datasets that are publicly available on the [10x Genomics website](https://www.10xgenomics.com/resources/datasets).
 ## Installation
 The `roe` package can be accessed from its [github repository](https://github.com/COMBINE-lab/roe). To install the `roe` package, start R and enter
 
@@ -16,7 +16,7 @@ The `roe` package can be accessed from its [github repository](https://github.co
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-# Install eisaR
+# Install dependencies
 BiocManager::install(c("eisaR","BSgenome","fishpond"))
 
 # install roe from github
@@ -68,7 +68,23 @@ The `make_splici_txome()` function has no returned value, but writes two files t
 
 The *splici* index of a given species consists of the transcriptome of the species, i.e., the spliced transcripts, and the intronic sequences of the species. Within a gene, if the flanked intronic sequences overlap with each other, the overlapped intronic sequences will be collapsed as a single intronic sequence to make sure each base will appear only once in the intronic sequences. For more detailed information, please check the Section S2 and S3 in the supplementary file of the [alevin-fry paper](https://www.nature.com/articles/s41592-022-01408-3).
 
+## preprocessed 10x datasets
 
+10x Genomics provides many publicly available single-cell RNA-sequencing datasets. These datasets are widely used in many scientific research projects. To avoid reinventing wheels, we processed these datasets using alevin-fry using a [nextflow-based alevin-fry workflow](https://github.com/COMBINE-lab/10x-requant), and provide here R functions to download and load the quantification result of these datasets into R as SingleCellExperiment ojects.
 
+If one needs to check the available datasets or download the available datasets to a local folder,  `preprocessed_10x_data()` is here to help.
 
+```R
+# to return the dataframe of the information of available datasets
+preprocessed_10x_data(return_available_dataset_df = TRUE)
 
+# to download some available datasets to a local directory
+# according to the row index in the available_dataset_df returned 
+# from the previous command
+preprocessed_10x_data(dataset_ids = c(1,5,7),
+                      return_available_dataset_df = FALSE,
+                      force = FALSE,
+                      delete_tar = TRUE,
+                      quiet = FALSE
+                    )
+```
