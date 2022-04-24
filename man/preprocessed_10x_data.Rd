@@ -5,9 +5,8 @@
 \title{Query preprocessed 10x datasets}
 \usage{
 preprocessed_10x_data(
-  dataset_ids,
-  out_dir = "10x_datasets",
-  return_available_dataset_df = FALSE,
+  dataset_ids = c(),
+  output_dir = "10x_datasets",
   force = FALSE,
   delete_tar = TRUE,
   quiet = FALSE
@@ -20,11 +19,7 @@ returned object will be a SingleCellExperiment object; If a vector
 is given, the returned object will be a list of SingleCellExperiment
 objects, each for a queried dataset.}
 
-\item{out_dir}{path to the output folder, will create if not exists.}
-
-\item{return_available_dataset_df}{logical whether
-to return dataframe recording all the the available datasets.
-If this is set as true, all other arguments will be ignored.}
+\item{output_dir}{path to the output folder, will create if not exists.}
 
 \item{force}{logical whether to force re-downloading the existing datasets.}
 
@@ -92,6 +87,8 @@ Currently, the datasets that are available for querying include:
 \item \href{https://www.10xgenomics.com/resources/datasets/1-k-brain-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Brain Cells from an E18 Mouse (v2 chemistry)}
 \item \href{https://www.10xgenomics.com/resources/datasets/1-k-heart-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Heart Cells from an E18 mouse (v2 chemistry)}
 }
+To obtain these information as a dataframe, one can simply run
+`preprocessed_10x_data()` in R.
 Note that because the name of datasets are too long, the stored
 datasets are named by the MD5 hash value of their fastqs.tar file. 
 If one would like to use the downloaded quantification results
@@ -102,9 +99,10 @@ corresponding datasets to find the MD5 hash value.
 
 library(roe)
 # run the function
-preprocessed_10x_data(dataset_id = c(1, 5, 11),
-                       out_dir = "10x_datasets",
-                       return_available_dataset_df = TRUE,
+available_datasets = preprocessed_10x_data()
+preprocessed_10x_data(dataset_id = c(1, 2),
+                       output_dir = "10x_datasets",
+                       force = FALSE,
                        delete_tar = TRUE,
                        quiet = FALSE
 )

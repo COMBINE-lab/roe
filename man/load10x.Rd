@@ -6,7 +6,7 @@
 \usage{
 load10x(
   dataset_ids,
-  out_dir = "preprocessed_10x_data",
+  output_dir = "preprocessed_10x_data",
   force = FALSE,
   delete_tar = TRUE,
   output_format = "scRNA",
@@ -19,7 +19,7 @@ load10x(
 dataset(s) to be downloaded and processed. See \code{\link{preprocessed_10x_data}}
 for details.}
 
-\item{out_dir}{path to the folder that will
+\item{output_dir}{path to the folder that will
 be used to store downloaded datasets.
 See \code{\link{preprocessed_10x_data}} for details.}
 
@@ -59,7 +59,9 @@ This function is a thin wrapper of the \code{\link[fishpond]{loadFry}}
 function and \code{\link{preprocessed_10x_data}} function. This function will
 download the preprocessed 10x datasets from a remote host and load
 them into R as a SingleCellExperiment object or a list of it if
-querying multiple datasets. This function takes the combination
+querying multiple datasets. To list all available datasets,
+simply run \code{preprocessed_10x_data()}
+This function takes the combination
 of the parameters of the \code{\link[fishpond]{loadFry}}
 function and \code{\link{preprocessed_10x_data}} function. For
 each of the \code{\link[fishpond]{loadFry}} parameters,
@@ -73,7 +75,7 @@ library(roe)
 # The four way to define output_format
 # are the same.
 load10x(dataset_ids = c(1, 2),
-        out_dir = tempdir(),
+        output_dir = "10x_datasets",
         force = FALSE,
         delete_tar = TRUE,
         output_format = "scRNA",

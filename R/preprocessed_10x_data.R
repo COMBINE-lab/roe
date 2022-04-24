@@ -7,14 +7,11 @@
 #' returned object will be a SingleCellExperiment object; If a vector
 #' is given, the returned object will be a list of SingleCellExperiment
 #' objects, each for a queried dataset.
-#' @param out_dir path to the output folder, will create if not exists.
+#' @param output_dir path to the output folder, will create if not exists.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' @param delete_tar logical whether to delete the compressed datasets.
 #' If FALSE, the tar files will be stored in a folder called datasets_tar
 #' under the \code{output_dir}.
-#' @param return_available_dataset_df logical whether
-#' to return dataframe recording all the the available datasets.
-#' If this is set as true, all other arguments will be ignored.
 #' @param quiet logical whether to display no messages.
 #'
 #' @author Dongze He
@@ -69,6 +66,8 @@
 #' \item \href{https://www.10xgenomics.com/resources/datasets/1-k-brain-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Brain Cells from an E18 Mouse (v2 chemistry)}
 #' \item \href{https://www.10xgenomics.com/resources/datasets/1-k-heart-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Heart Cells from an E18 mouse (v2 chemistry)}
 #' }
+#' To obtain these information as a dataframe, one can simply run
+#' `preprocessed_10x_data()` in R.
 #' Note that because the name of datasets are too long, the stored
 #' datasets are named by the MD5 hash value of their fastqs.tar file. 
 #' If one would like to use the downloaded quantification results
@@ -86,9 +85,10 @@
 #' 
 #' library(roe)
 #' # run the function
-#' preprocessed_10x_data(dataset_id = c(1, 5, 11),
-#'                        out_dir = "10x_datasets",
-#'                        return_available_dataset_df = TRUE,
+#' available_datasets = preprocessed_10x_data()
+#' preprocessed_10x_data(dataset_id = c(1, 2),
+#'                        output_dir = "10x_datasets",
+#'                        force = FALSE,
 #'                        delete_tar = TRUE,
 #'                        quiet = FALSE
 #' )
@@ -96,9 +96,8 @@
 
 
 
-preprocessed_10x_data <- function(dataset_ids,
-                              out_dir = "10x_datasets",
-                              return_available_dataset_df = FALSE,
+preprocessed_10x_data <- function(dataset_ids = c(),
+                              output_dir = "10x_datasets",
                               force = FALSE,
                               delete_tar = TRUE,
                               quiet = FALSE
@@ -108,7 +107,7 @@ preprocessed_10x_data <- function(dataset_ids,
 # usethis::use_data(available_datasets, internal = TRUE)
 
   # if the user just wants the data frame, return it
-  if (return_available_dataset_df) {
+  if (length(dataset_ids) == 0) {
     return (available_datasets)
   }
 
@@ -131,7 +130,7 @@ preprocessed_10x_data <- function(dataset_ids,
   # download the quantification tar file for each queried dataset.
   quant_dir_list <- c()
   # folder for (temporarily) storing tar files.
-  tar_dir <- file.path(out_dir, "datasets_tar")
+  tar_dir <- file.path(output_dir, "datasets_tar")
   dir.create(tar_dir, recursive = TRUE,
               showWarnings = FALSE)
 
@@ -139,9 +138,9 @@ preprocessed_10x_data <- function(dataset_ids,
     .say(quiet, "\n\nProceeding dataset #", dataset_id)
 
     # specify paths
-    quant_parent_dir <- file.path(out_dir,
+    quant_parent_dir <- file.path(output_dir,
                           available_datasets[dataset_id, "MD5"]
-                          )
+                        )
 
     tar_file <- file.path(tar_dir,
                             paste0(available_datasets[dataset_id, "MD5"],
@@ -170,7 +169,6 @@ preprocessed_10x_data <- function(dataset_ids,
                           destfile = tar_file,
                           quiet = TRUE,
                           cacheOK = FALSE)
-
 
     .say(quiet, "    Decompressing alevin-fry quant folder")
     utils::untar(tarfile = tar_file,

@@ -4,7 +4,7 @@
 #' @param dataset_ids integer scalar or vector providing the id of the
 #' dataset(s) to be downloaded and processed. See \code{\link{preprocessed_10x_data}}
 #' for details.
-#' @param out_dir path to the folder that will
+#' @param output_dir path to the folder that will
 #' be used to store downloaded datasets.
 #' See \code{\link{preprocessed_10x_data}} for details.
 #' @param force logical whether to force re-downloading the existing datasets.
@@ -30,7 +30,9 @@
 #' function and \code{\link{preprocessed_10x_data}} function. This function will
 #' download the preprocessed 10x datasets from a remote host and load
 #' them into R as a SingleCellExperiment object or a list of it if
-#' querying multiple datasets. This function takes the combination
+#' querying multiple datasets. To list all available datasets,
+#' simply run \code{preprocessed_10x_data()}
+#' This function takes the combination
 #' of the parameters of the \code{\link[fishpond]{loadFry}}
 #' function and \code{\link{preprocessed_10x_data}} function. For
 #' each of the \code{\link[fishpond]{loadFry}} parameters,
@@ -51,7 +53,7 @@
 #' # The four way to define output_format
 #' # are the same.
 #' load10x(dataset_ids = c(1, 2),
-#'         out_dir = tempdir(),
+#'         output_dir = "10x_datasets",
 #'         force = FALSE,
 #'         delete_tar = TRUE,
 #'         output_format = "scRNA",
@@ -66,7 +68,7 @@
 #' 
 
 load10x <- function(dataset_ids,
-                    out_dir = "preprocessed_10x_data",
+                    output_dir = "preprocessed_10x_data",
                     force = FALSE,
                     delete_tar = TRUE,
                     output_format = "scRNA",
@@ -131,7 +133,7 @@ load10x <- function(dataset_ids,
 
     # download the datsets
     dataset_paths <- preprocessed_10x_data(dataset_ids = dataset_ids,
-                            out_dir = out_dir,
+                            output_dir = output_dir,
                             force = force,
                             delete_tar =  delete_tar,
                             quiet = quiet

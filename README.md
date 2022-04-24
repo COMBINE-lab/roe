@@ -76,13 +76,13 @@ If one needs to check the available datasets or download the available datasets 
 
 ```R
 # to return the dataframe of the information of available datasets
-preprocessed_10x_data(return_available_dataset_df = TRUE)
+preprocessed_10x_data()
 
 # to download some available datasets to a local directory
 # according to the row index in the available_dataset_df returned 
 # from the previous command
 preprocessed_10x_data(dataset_ids = c(1,5,7),
-                      return_available_dataset_df = FALSE,
+                      output_dir = "10x_datasets",
                       force = FALSE,
                       delete_tar = TRUE,
                       quiet = FALSE
