@@ -70,6 +70,7 @@ queried dataset.
 }
 \examples{
 
+\dontrun{
 library(roe)
 # run the function
 # The four way to define output_format
@@ -87,5 +88,6 @@ load10x(dataset_ids = c(1, 2),
         nonzero = FALSE,
         quiet = FALSE
 )
+}
 
 }

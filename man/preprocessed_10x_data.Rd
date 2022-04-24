@@ -97,6 +97,7 @@ corresponding datasets to find the MD5 hash value.
 }
 \examples{
 
+\dontrun{
 library(roe)
 # run the function
 available_datasets = preprocessed_10x_data()
@@ -106,6 +107,7 @@ preprocessed_10x_data(dataset_id = c(1, 2),
                        delete_tar = TRUE,
                        quiet = FALSE
 )
+}
 
 }
 \author{

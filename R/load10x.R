@@ -48,6 +48,7 @@
 #'
 #' @examples
 #' 
+#' \dontrun{
 #' library(roe)
 #' # run the function
 #' # The four way to define output_format
@@ -65,6 +66,7 @@
 #'         nonzero = FALSE,
 #'         quiet = FALSE
 #' )
+#' }
 #' 
 
 load10x <- function(dataset_ids,

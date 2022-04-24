@@ -83,6 +83,7 @@
 #'
 #' @examples
 #' 
+#' \dontrun{
 #' library(roe)
 #' # run the function
 #' available_datasets = preprocessed_10x_data()
@@ -92,6 +93,7 @@
 #'                        delete_tar = TRUE,
 #'                        quiet = FALSE
 #' )
+#' }
 #'
 
 
