@@ -53,7 +53,7 @@
 #' # run the function
 #' # The four way to define output_format
 #' # are the same.
-#' load10x(dataset_ids = c(1, 2),
+#' load_processed_quant(dataset_ids = c(1, 2),
 #'         output_dir = "10x_datasets",
 #'         force = FALSE,
 #'         delete_tar = TRUE,
@@ -69,7 +69,7 @@
 #' }
 #' 
 
-load10x <- function(dataset_ids,
+load_processed_quant <- function(dataset_ids,
                     output_dir = "processed_data_quant",
                     force = FALSE,
                     delete_tar = TRUE,

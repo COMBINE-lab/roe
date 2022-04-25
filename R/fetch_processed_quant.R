@@ -66,18 +66,18 @@
 #' \item \href{https://www.10xgenomics.com/resources/datasets/1-k-brain-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Brain Cells from an E18 Mouse (v2 chemistry)}
 #' \item \href{https://www.10xgenomics.com/resources/datasets/1-k-heart-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Heart Cells from an E18 mouse (v2 chemistry)}
 #' }
-#' To obtain these information as a dataframe, one can simply run
+#' To obtain these information as a data frame, one can simply run
 #' `preprocessed_10x_data()` in R.
 #' Note that because the name of datasets are too long, the stored
-#' datasets are named by the MD5 hash value of their fastqs.tar file. 
+#' datasets are named by the MD5 hash value of their fastqs.tar file.
 #' If one would like to use the downloaded quantification results
-#' out of this funbction, please refer to the webpage of the
+#' out of this function, please refer to the webpage of the
 #' corresponding datasets to find the MD5 hash value.
 #'
 #' @export
 #'
 #' @return If return_available_dataset_df is set as true,
-#' a dataframe containing all available datasets will be returned;
+#' a data frame containing all available datasets will be returned;
 #' otherwise, a vector of local paths to the downloaded datasets
 #' will be returned.
 #'
@@ -86,8 +86,8 @@
 #' \dontrun{
 #' library(roe)
 #' # run the function
-#' available_datasets = preprocessed_10x_data()
-#' preprocessed_10x_data(dataset_id = c(1, 2),
+#' available_datasets = load_processed_quant()
+#' load_processed_quant(dataset_id = c(1, 2),
 #'                        output_dir = "10x_datasets",
 #'                        force = FALSE,
 #'                        delete_tar = TRUE,
