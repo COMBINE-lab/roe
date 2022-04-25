@@ -136,7 +136,7 @@ preprocessed_10x_data <- function(dataset_ids = c(),
               showWarnings = FALSE)
 
   for (dataset_id in dataset_ids) {
-    .say(quiet, "\n\nProceeding dataset #", dataset_id)
+    .say(quiet, "\nProceeding dataset #", dataset_id)
 
     # specify paths
     quant_parent_dir <- file.path(output_dir,
