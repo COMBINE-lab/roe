@@ -1,6 +1,5 @@
-#' Query preprocessed 10x datasets
+#' Fetch preprocessed 10x datasets
 #'
-#' Construct the splici transcriptome for alevin-fry.
 #'
 #' @param dataset_ids integer scalar or vector providing the id of the
 #' dataset(s) to be downloaded and processed. If a scalar is given, the
