@@ -6,7 +6,7 @@
 \usage{
 load10x(
   dataset_ids,
-  output_dir = "preprocessed_10x_data",
+  output_dir = "processed_data_quant",
   force = FALSE,
   delete_tar = TRUE,
   output_format = "scRNA",
@@ -16,19 +16,19 @@ load10x(
 }
 \arguments{
 \item{dataset_ids}{integer scalar or vector providing the id of the
-dataset(s) to be downloaded and processed. See \code{\link{preprocessed_10x_data}}
+dataset(s) to be downloaded and processed. See \code{\link{fetch_processed_quant}}
 for details.}
 
 \item{output_dir}{path to the folder that will
 be used to store downloaded datasets.
-See \code{\link{preprocessed_10x_data}} for details.}
+See \code{\link{fetch_processed_quant}} for details.}
 
 \item{force}{logical whether to force re-downloading the existing datasets.
-See \code{\link{preprocessed_10x_data}} for details.}
+See \code{\link{fetch_processed_quant}} for details.}
 
 \item{delete_tar}{logical whether to delete the intermediate 
 compressed datasets.
-See \code{\link{preprocessed_10x_data}} for details.}
+See \code{\link{fetch_processed_quant}} for details.}
 
 \item{output_format}{can be \emph{either} a valid
 \code{\link[fishpond]{loadFry}} \code{outputFormat}
@@ -56,14 +56,14 @@ Download and load preprocessed 10x datasets as SingleCellExperiment objects.
 }
 \details{
 This function is a thin wrapper of the \code{\link[fishpond]{loadFry}}
-function and \code{\link{preprocessed_10x_data}} function. This function will
+function and \code{\link{fetch_processed_quant}} function. This function will
 download the preprocessed 10x datasets from a remote host and load
 them into R as a SingleCellExperiment object or a list of it if
 querying multiple datasets. To list all available datasets,
-simply run \code{preprocessed_10x_data()}
+simply run \code{fetch_processed_quant()}
 This function takes the combination
 of the parameters of the \code{\link[fishpond]{loadFry}}
-function and \code{\link{preprocessed_10x_data}} function. For
+function and \code{\link{fetch_processed_quant}} function. For
 each of the \code{\link[fishpond]{loadFry}} parameters,
 a list of that parameter can be specified, each for a
 queried dataset.
