@@ -1,11 +1,11 @@
-#' Download and load 10x datasets
+#' Fetch and load 10x datasets
 #'
-#' Download and load preprocessed 10x datasets as SingleCellExperiment objects.
+#' Fetch and load preprocessed 10x datasets as SingleCellExperiment objects.
 #' @param dataset_ids integer scalar or vector providing the id of the
-#' dataset(s) to be downloaded and processed. See \code{\link{fetch_processed_quant}}
+#' dataset(s) to be Fetched and processed. See \code{\link{fetch_processed_quant}}
 #' for details.
-#' @param output_dir path to the folder that will
-#' be used to store downloaded datasets.
+#' @param fetch_dir path to the folder where the fetched quantification results
+#' should be stored.
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' See \code{\link{fetch_processed_quant}} for details.
@@ -41,10 +41,8 @@
 #' 
 #' @export
 #'
-#' @return If a single dataset is queried, a SingleCellExperiment
-#' object will be returned. If multiple datasets are queried,
-#' a list of SingleCellExperiment objects will be returned, each
-#' for a queried dataset.
+#' @return A of SingleCellExperiment object(s) will be returned, each item
+#' represent one queried dataset.
 #'
 #' @examples
 #' 
@@ -54,7 +52,7 @@
 #' # The four way to define output_format
 #' # are the same.
 #' load_processed_quant(dataset_ids = c(1, 2),
-#'         output_dir = "10x_datasets",
+#'         fetch_dir = "10x_datasets",
 #'         force = FALSE,
 #'         delete_tar = TRUE,
 #'         output_format = "scRNA",
@@ -69,8 +67,8 @@
 #' }
 #' 
 
-load_processed_quant <- function(dataset_ids,
-                    output_dir = "processed_data_quant",
+load_processed_quant <- function(dataset_ids = c(),
+                    fetch_dir = "processed_data_quant",
                     force = FALSE,
                     delete_tar = TRUE,
                     output_format = "scRNA",
@@ -82,39 +80,33 @@ load_processed_quant <- function(dataset_ids,
     # we just check the length, the validity of
     # each outputFormat will be checked by loadFry
     nd <- length(dataset_ids)
-    # output_format <- list(list(counts = c("U", "S")),
-    #                         list(counts = c("U", "S")),
-    #                         list(counts = c("U", "S")))
-    if (is.list(output_format[[1]])) {
-        # user defines outputFormat for each dataset
-        # check whether length matches
+    
+    # if the user just wants the data frame, return it
+    if (length(dataset_ids) == 0) {
+        return (available_datasets)
+    }
+
+    if (is.list(output_format)) {
+        # if a list is given,
+        # it should be either one customized format
+        # or the format of each fetched datasets
+        # so check the name
+        if (!setequal(sort(names(output_format)), sort(dataset_ids))) {
+            # now it should be one customized format
+            output_format <- as.list(rep(list(output_format), nd))
+            names(output_format) <- dataset_ids
+        }
+        # otherwise, each dataset should get a format, so check the length
         if (length(output_format) != nd) {
             stop("The providing output_format list has different length with dataset_ids, cannot proceed")
         }
-    } else if (is.list(output_format)) {
-        # if user provides a list, it can
-        # either be a customized outputFormat
-        # or a list of pre-defined outputFormats
-        # if customized, then repeat it for each
-        # queried dataset
-        # output_format <- list(counts = c("U", "S"))
-        if (sum(output_format[[1]] %in% c("U", "S", "A")) > 0) {
-            # if user provides a customized outputFormat,
-            # repeat it for each queried dataset
-            # output_format <- rep(output_format, nd)
-        } else {
-            # if user set a outputFormat for eahc queried dataset,
-            # then check the length
-            # output_format <- list("scRNA", "scRNA", "scRNA")
-            if (length(output_format) != nd) {
-                stop("The providing output_format list has different length with dataset_ids, cannot proceed")
-            }
-        }
+    } else if (is.character(output_format)) {
+        # if a str is given, it should be a pre-defined format
+        # and it will be used for all datasets
+        output_format <- as.list(rep(output_format, nd))
+        names(output_format) <- dataset_ids
     } else {
-        # output_format <- "scRNA"
-        # The last valid situation is that the user provides a sinlg pre-defined format
-        # then we repeat it for every dataset
-        output_format <- rep(output_format, nd)
+        stop("The providing output_format list has different length with dataset_ids, cannot proceed")
     }
     
     # then we do the same thing for nonzero
@@ -125,7 +117,7 @@ load_processed_quant <- function(dataset_ids,
             stop("The providing nonzero list has different length with dataset_ids, cannot proceed")
         }
     } else {
-        # The last valid situation is that the 
+        # The last valid situation is that the
         # user provides a sinlg pre-defined format
         # then we repeat it for every dataset
         nonzero <- rep(nonzero, nd)
@@ -135,26 +127,28 @@ load_processed_quant <- function(dataset_ids,
 
     # download the datsets
     dataset_paths <- fetch_processed_quant(dataset_ids = dataset_ids,
-                            output_dir = output_dir,
-                            force = force,
-                            delete_tar =  delete_tar,
-                            quiet = quiet
-                            )
+                                            fetch_dir = fetch_dir,
+                                            force = force,
+                                            delete_tar =  delete_tar,
+                                            quiet = quiet
+                                            )
 
     sce_list <- list()
     # process them using user output
     for (dataset_id in seq(nd)) {
         .say(quiet, "Loading dataset ", dataset_ids[dataset_id])
 
-        dataset_path_ds <- dataset_paths[dataset_id]
-        output_format_ds <- output_format[[dataset_id]]
-        nonzero_ds <- nonzero[[dataset_id]]
-        sce_list[[dataset_id]] <-
+        dataset_path_ds <- dataset_paths[as.character(dataset_id)]
+        output_format_ds <- output_format[[as.character(dataset_id)]]
+        nonzero_ds <- nonzero[[as.character(dataset_id)]]
+        sce_list[[as.character(dataset_id)]] <-
                             fishpond::loadFry(fryDir = dataset_path_ds,
                                                 outputFormat = output_format_ds,
                                                 nonzero = nonzero_ds,
                                                 quiet = quiet
                         )
     }
-}
 
+    # output
+    sce_list
+}

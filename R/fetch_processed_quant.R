@@ -1,4 +1,4 @@
-#' Query preprocessed 10x datasets
+#' Fetch preprocessed 10x datasets
 #'
 #' Construct the splici transcriptome for alevin-fry.
 #'
@@ -7,11 +7,12 @@
 #' returned object will be a SingleCellExperiment object; If a vector
 #' is given, the returned object will be a list of SingleCellExperiment
 #' objects, each for a queried dataset.
-#' @param output_dir path to the output folder, will create if not exists.
+#' @param fetch_dir path to the folder where the fetched quantification results
+#' should be stored. It will create if not exists.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' @param delete_tar logical whether to delete the compressed datasets.
 #' If FALSE, the tar files will be stored in a folder called datasets_tar
-#' under the \code{output_dir}.
+#' under the \code{fetch_dir}.
 #' @param quiet logical whether to display no messages.
 #'
 #' @author Dongze He
@@ -88,7 +89,7 @@
 #' # run the function
 #' available_datasets = load_processed_quant()
 #' load_processed_quant(dataset_id = c(1, 2),
-#'                        output_dir = "10x_datasets",
+#'                        fetch_dir = "10x_datasets",
 #'                        force = FALSE,
 #'                        delete_tar = TRUE,
 #'                        quiet = FALSE
@@ -99,14 +100,14 @@
 
 
 fetch_processed_quant <- function(dataset_ids = c(),
-                              output_dir = "10x_datasets",
+                              fetch_dir = "10x_datasets",
                               force = FALSE,
                               delete_tar = TRUE,
                               quiet = FALSE
                               ) {
 
-# available_datasets = read.csv("available_datasets.tsv", sep = "\t")
-# usethis::use_data(available_datasets, internal = TRUE)
+  # available_datasets = read.csv("available_datasets.tsv", sep = "\t")
+  # usethis::use_data(available_datasets, internal = TRUE)
 
   # if the user just wants the data frame, return it
   if (length(dataset_ids) == 0) {
@@ -119,8 +120,13 @@ fetch_processed_quant <- function(dataset_ids = c(),
   # now check the validity of dataset_ids
   for (idx in seq(length(dataset_ids))) {
     dataset_id <- dataset_ids[idx]
-    if (!(is.numeric(dataset_id) & dataset_id <= nrow(available_datasets))) {
-      message("Found invalid dataset id: ", dataset_id, ", ignored")
+    if (is.numeric(dataset_id)) {
+      if (!(dataset_id <= nrow(available_datasets) & dataset_id >= 1)) {
+        message("Found invalid dataset id: ", dataset_id, ", ignored")
+        invalid_ids <- c(invalid_ids, idx)
+      }
+    } else {
+      message("Found invalid dataset id: '", dataset_id, "', ignored")
       invalid_ids <- c(invalid_ids, idx)
     }
   }
@@ -135,7 +141,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
   # download the quantification tar file for each queried dataset.
   quant_dir_list <- c()
   # folder for (temporarily) storing tar files.
-  tar_dir <- file.path(output_dir, "datasets_tar")
+  tar_dir <- file.path(fetch_dir, "datasets_tar")
   dir.create(tar_dir, recursive = TRUE,
               showWarnings = FALSE)
 
@@ -143,7 +149,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
     .say(quiet, "\n\nProceeding dataset #", dataset_id)
 
     # specify paths
-    quant_parent_dir <- file.path(output_dir,
+    quant_parent_dir <- file.path(fetch_dir,
                           available_datasets[dataset_id, "MD5"]
                         )
 
@@ -192,9 +198,8 @@ fetch_processed_quant <- function(dataset_ids = c(),
     .say(quiet, "Delete temp tar files")
     unlink(tar_dir,  recursive = TRUE, force = TRUE)
   }
-  if (!quiet) {
-    message("Done")
-  }
+  .say(quiet, "Done")
+
   names(quant_dir_list) <- dataset_ids
   quant_dir_list
 }
