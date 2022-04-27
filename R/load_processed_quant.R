@@ -68,7 +68,7 @@
 #' 
 
 load_processed_quant <- function(dataset_ids = c(),
-                    fetch_dir = "processed_data_quant",
+                    fetch_dir = "processed_quant",
                     force = FALSE,
                     delete_tar = TRUE,
                     output_format = "scRNA",
@@ -108,7 +108,7 @@ load_processed_quant <- function(dataset_ids = c(),
     } else {
         stop("The providing output_format list has different length with dataset_ids, cannot proceed")
     }
-    
+
     # then we do the same thing for nonzero
     if (is.list(nonzero)) {
         # user defines a nonzero for each dataset
@@ -120,10 +120,11 @@ load_processed_quant <- function(dataset_ids = c(),
         # The last valid situation is that the
         # user provides a sinlg pre-defined format
         # then we repeat it for every dataset
-        nonzero <- rep(nonzero, nd)
+        nonzero <- as.list(rep(nonzero, nd))
+        names(nonzero) <- dataset_ids
     }
 
-    .say(quiet, "Downloading datasets")
+    .say(quiet, "Fetching datasets")
 
     # download the datsets
     dataset_paths <- fetch_processed_quant(dataset_ids = dataset_ids,
@@ -135,13 +136,14 @@ load_processed_quant <- function(dataset_ids = c(),
 
     sce_list <- list()
     # process them using user output
-    for (dataset_id in seq(nd)) {
-        .say(quiet, "Loading dataset ", dataset_ids[dataset_id])
+    for (dataset_id in dataset_ids) {
+        dataset_id <- as.character(dataset_id)
+        .say(quiet, "Loading dataset ", dataset_id)
 
-        dataset_path_ds <- dataset_paths[as.character(dataset_id)]
-        output_format_ds <- output_format[[as.character(dataset_id)]]
-        nonzero_ds <- nonzero[[as.character(dataset_id)]]
-        sce_list[[as.character(dataset_id)]] <-
+        dataset_path_ds <- dataset_paths[dataset_id]
+        output_format_ds <- output_format[[dataset_id]]
+        nonzero_ds <- nonzero[[dataset_id]]
+        sce_list[[dataset_id]] <-
                             fishpond::loadFry(fryDir = dataset_path_ds,
                                                 outputFormat = output_format_ds,
                                                 nonzero = nonzero_ds,

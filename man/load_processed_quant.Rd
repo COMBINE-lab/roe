@@ -6,7 +6,7 @@
 \usage{
 load_processed_quant(
   dataset_ids = c(),
-  fetch_dir = "processed_data_quant",
+  fetch_dir = "processed_quant",
   force = FALSE,
   delete_tar = TRUE,
   output_format = "scRNA",

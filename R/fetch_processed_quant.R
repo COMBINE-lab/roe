@@ -100,7 +100,7 @@
 
 
 fetch_processed_quant <- function(dataset_ids = c(),
-                              fetch_dir = "10x_datasets",
+                              fetch_dir = "processed_quant",
                               force = FALSE,
                               delete_tar = TRUE,
                               quiet = FALSE
@@ -111,27 +111,24 @@ fetch_processed_quant <- function(dataset_ids = c(),
 
   # if the user just wants the data frame, return it
   if (length(dataset_ids) == 0) {
-    return (available_datasets)
+    return(available_datasets)
   }
 
   .say(quiet, "Check the validity of dataset_ids")
 
-  invalid_ids <- c()
   # now check the validity of dataset_ids
-  for (idx in seq(length(dataset_ids))) {
-    dataset_id <- dataset_ids[idx]
-    if (is.numeric(dataset_id)) {
-      if (!(dataset_id <= nrow(available_datasets) & dataset_id >= 1)) {
-        message("Found invalid dataset id: ", dataset_id, ", ignored")
-        invalid_ids <- c(invalid_ids, idx)
-      }
-    } else {
-      message("Found invalid dataset id: '", dataset_id, "', ignored")
-      invalid_ids <- c(invalid_ids, idx)
+  if (is.numeric(dataset_ids)) {
+    valid_ids <- (dataset_ids >= 1) &
+                    (dataset_ids <= nrow(available_datasets))
+    if (any(!valid_ids)) {
+      message("Found invalid dataset id: '",
+              paste0(dataset_ids[!valid_ids], collapse = "' '"),
+              "', ignored")
+      dataset_ids <- dataset_ids[valid_ids]
     }
+  } else {
+    stop("dataset ids must be integer")
   }
-  dataset_ids <- dataset_ids[-invalid_ids]
-
 
   # check whether there is any dataset id left
   if (length(dataset_ids) == 0) {
@@ -150,7 +147,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
 
     # specify paths
     quant_parent_dir <- file.path(fetch_dir,
-                          available_datasets[dataset_id, "MD5"]
+                          dataset_id
                         )
 
     tar_file <- file.path(tar_dir,
