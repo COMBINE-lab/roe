@@ -8,7 +8,7 @@ preprocessed_10x_data(
   dataset_ids = c(),
   output_dir = "10x_datasets",
   force = FALSE,
-  delete_tar = TRUE,
+  keep_tar = TRUE,
   quiet = FALSE
 )
 }
@@ -23,7 +23,7 @@ objects, each for a queried dataset.}
 
 \item{force}{logical whether to force re-downloading the existing datasets.}
 
-\item{delete_tar}{logical whether to delete the compressed datasets.
+\item{keep_tar}{logical whether to delete the compressed datasets.
 If FALSE, the tar files will be stored in a folder called datasets_tar
 under the \code{output_dir}.}
 
@@ -104,7 +104,7 @@ available_datasets = preprocessed_10x_data()
 preprocessed_10x_data(dataset_id = c(1, 2),
                        output_dir = "10x_datasets",
                        force = FALSE,
-                       delete_tar = TRUE,
+                       keep_tar = TRUE,
                        quiet = FALSE
 )
 }

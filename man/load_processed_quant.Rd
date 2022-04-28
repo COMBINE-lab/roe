@@ -8,7 +8,7 @@ load_processed_quant(
   dataset_ids = c(),
   fetch_dir = "processed_quant",
   force = FALSE,
-  delete_tar = TRUE,
+  keep_tar = TRUE,
   output_format = "scRNA",
   nonzero = FALSE,
   quiet = FALSE
@@ -26,7 +26,7 @@ See \code{\link{fetch_processed_quant}} for details.}
 \item{force}{logical whether to force re-downloading the existing datasets.
 See \code{\link{fetch_processed_quant}} for details.}
 
-\item{delete_tar}{logical whether to delete the intermediate 
+\item{keep_tar}{logical whether to delete the intermediate 
 compressed datasets.
 See \code{\link{fetch_processed_quant}} for details.}
 
@@ -82,7 +82,7 @@ library(roe)
 load_processed_quant(dataset_ids = c(1, 2),
         fetch_dir = "processed_quant",
         force = FALSE,
-        delete_tar = TRUE,
+        keep_tar = TRUE,
         output_format = "scRNA",
 #         output_format = list("scRNA", "scRNA"),
 #         output_format = list("1" = list(counts = c("S", "A")),

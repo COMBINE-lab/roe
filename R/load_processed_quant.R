@@ -9,7 +9,7 @@
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' See \code{\link{fetch_processed_quant}} for details.
-#' @param delete_tar logical whether to delete the intermediate 
+#' @param keep_tar logical whether to delete the intermediate 
 #' compressed datasets.
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param output_format can be \emph{either} a valid
@@ -60,7 +60,7 @@
 #' load_processed_quant(dataset_ids = c(1, 2),
 #'         fetch_dir = "processed_quant",
 #'         force = FALSE,
-#'         delete_tar = TRUE,
+#'         keep_tar = TRUE,
 #'         output_format = "scRNA",
 #' #         output_format = list("scRNA", "scRNA"),
 #' #         output_format = list("1" = list(counts = c("S", "A")),
@@ -76,7 +76,7 @@
 load_processed_quant <- function(dataset_ids = c(),
                     fetch_dir = "processed_quant",
                     force = FALSE,
-                    delete_tar = TRUE,
+                    keep_tar = TRUE,
                     output_format = "scRNA",
                     nonzero = FALSE,
                     quiet = FALSE
@@ -86,7 +86,7 @@ load_processed_quant <- function(dataset_ids = c(),
     # we just check the length, the validity of
     # each outputFormat will be checked by loadFry
     nd <- length(dataset_ids)
-    
+
     # if the user just wants the data frame, return it
     if (length(dataset_ids) == 0) {
         return (available_datasets)
@@ -136,7 +136,7 @@ load_processed_quant <- function(dataset_ids = c(),
     dataset_list <- fetch_processed_quant(dataset_ids = dataset_ids,
                                             fetch_dir = fetch_dir,
                                             force = force,
-                                            delete_tar =  delete_tar,
+                                            keep_tar =  keep_tar,
                                             quiet = quiet
                                             )
 
@@ -149,7 +149,8 @@ load_processed_quant <- function(dataset_ids = c(),
         output_format_ds <- output_format[[dataset_id]]
         nonzero_ds <- nonzero[[dataset_id]]
 
-        processed_dataset = .get_dataset_info_list(available_datasets, dataset_id)
+        processed_dataset = .get_dataset_info_list(available_datasets,
+                                                    dataset_id)
         processed_dataset[["quant_dir"]] <- quant_dir_ds
         processed_dataset[["sce"]] <-
                             fishpond::loadFry(fryDir = quant_dir_ds,

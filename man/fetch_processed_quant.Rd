@@ -8,7 +8,7 @@ fetch_processed_quant(
   dataset_ids = c(),
   fetch_dir = "processed_quant",
   force = FALSE,
-  delete_tar = TRUE,
+  keep_tar = TRUE,
   quiet = FALSE
 )
 }
@@ -24,7 +24,7 @@ should be stored. It will create if not exists.}
 
 \item{force}{logical whether to force re-downloading the existing datasets.}
 
-\item{delete_tar}{logical whether to delete the compressed datasets.
+\item{keep_tar}{logical whether to delete the compressed datasets.
 If FALSE, the tar files will be stored in a folder called datasets_tar
 under the \code{fetch_dir}.}
 
@@ -106,7 +106,7 @@ available_datasets = load_processed_quant()
 fetch_processed_quant(dataset_id = c(1, 2),
                        fetch_dir = "processed_quant",
                        force = FALSE,
-                       delete_tar = TRUE,
+                       keep_tar = TRUE,
                        quiet = FALSE
 )
 }

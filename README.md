@@ -84,7 +84,7 @@ fetch_processed_quant()
 fetch_processed_quant(dataset_ids = c(1,5,7),
                       output_dir = "processed_quant",
                       force = FALSE,
-                      delete_tar = TRUE,
+                      keep_tar = TRUE,
                       quiet = FALSE
                     )
 ```
@@ -95,7 +95,7 @@ We also provide a thin wrapper of the `fetch_processed_quant()` and [`fishpond::
 load_processed_quant(dataset_ids = c(1, 2),
         fetch_dir = "processed_quant",
         force = FALSE,
-        delete_tar = TRUE,
+        keep_tar = TRUE,
         output_format = "scRNA",
 #         output_format = list("scRNA", "scRNA"),
 #         output_format = list("1" = list(counts = c("S", "A")),

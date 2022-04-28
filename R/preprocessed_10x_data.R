@@ -8,7 +8,7 @@
 #' objects, each for a queried dataset.
 #' @param output_dir path to the output folder, will create if not exists.
 #' @param force logical whether to force re-downloading the existing datasets.
-#' @param delete_tar logical whether to delete the compressed datasets.
+#' @param keep_tar logical whether to delete the compressed datasets.
 #' If FALSE, the tar files will be stored in a folder called datasets_tar
 #' under the \code{output_dir}.
 #' @param quiet logical whether to display no messages.
@@ -89,7 +89,7 @@
 #' preprocessed_10x_data(dataset_id = c(1, 2),
 #'                        output_dir = "10x_datasets",
 #'                        force = FALSE,
-#'                        delete_tar = TRUE,
+#'                        keep_tar = TRUE,
 #'                        quiet = FALSE
 #' )
 #' }
@@ -100,7 +100,7 @@
 preprocessed_10x_data <- function(dataset_ids = c(),
                               output_dir = "10x_datasets",
                               force = FALSE,
-                              delete_tar = TRUE,
+                              keep_tar = TRUE,
                               quiet = FALSE
                               ) {
 
@@ -184,7 +184,7 @@ preprocessed_10x_data <- function(dataset_ids = c(),
 
   }
 
-  if (delete_tar) {
+  if (keep_tar) {
     .say(quiet, "Delete temp tar files")
     unlink(tar_dir,  recursive = TRUE, force = TRUE)
   }
