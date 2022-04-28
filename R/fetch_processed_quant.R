@@ -89,7 +89,7 @@
 #' # run the function
 #' available_datasets = load_processed_quant()
 #' load_processed_quant(dataset_id = c(1, 2),
-#'                        fetch_dir = "10x_datasets",
+#'                        fetch_dir = "processed_quant",
 #'                        force = FALSE,
 #'                        delete_tar = TRUE,
 #'                        quiet = FALSE

@@ -14,15 +14,12 @@
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param output_format can be \emph{either} a valid
 #' \code{\link[fishpond]{loadFry}} \code{outputFormat}
-#' or a list of it. If it is a list, each item in the list
-#' corresponds to a queried dataset and
-#' should be a valid loadFry-\code{outputFormat}.
-#' Each queried dataset will be loaded according to
-#' the corresponding \code{outputFormat} in the list.
+#' or a list of it. The \code{names} of the list must
+#' match the \code{dataset_ids}.
 #' @param nonzero Similar with \code{outputFormat}, it can be
 #' either a valid \code{\link[fishpond]{loadFry}} \code{nonzero}
-#' parameter or a list of it. If a list, the queried datasets
-#' will be processed using the corresponding \code{nonzero}.
+#' parameter or a list of it. If a list, The \code{names} of the 
+#' list must match the \code{dataset_ids}.
 #' @param quiet logical whether to display no messages
 #'
 #' @details
@@ -49,18 +46,18 @@
 #' \dontrun{
 #' library(roe)
 #' # run the function
-#' # The four way to define output_format
+#' # The four ways to define output_format
 #' # are the same.
 #' load_processed_quant(dataset_ids = c(1, 2),
-#'         fetch_dir = "10x_datasets",
+#'         fetch_dir = "processed_quant",
 #'         force = FALSE,
 #'         delete_tar = TRUE,
 #'         output_format = "scRNA",
 #' #         output_format = list("scRNA", "scRNA"),
-#' #         output_format = list(list(counts = c("S", "A")),
-#' #                               list(counts = c("S", "A"))
+#' #         output_format = list("1" = list(counts = c("S", "A")),
+#' #                               "2" = list(counts = c("S", "A"))
 #' #                              ),
-#' #         output_format = list(counts = c("S", "A")),
+#' #         output_format = list("counts" = c("S", "A")),
 #'         nonzero = FALSE,
 #'         quiet = FALSE
 #' )

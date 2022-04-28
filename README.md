@@ -76,15 +76,35 @@ If one needs to check the available datasets or download the available datasets 
 
 ```R
 # to return the dataframe of the information of available datasets
-preprocessed_10x_data()
+fetch_processed_quant()
 
 # to download some available datasets to a local directory
 # according to the row index in the available_dataset_df returned 
 # from the previous command
-preprocessed_10x_data(dataset_ids = c(1,5,7),
-                      output_dir = "10x_datasets",
+fetch_processed_quant(dataset_ids = c(1,5,7),
+                      output_dir = "processed_quant",
                       force = FALSE,
                       delete_tar = TRUE,
                       quiet = FALSE
                     )
+```
+
+We also provide a thin wrapper of the `fetch_processed_quant()` and [`fishpond::loadFry`](https://github.com/mikelove/fishpond/blob/master/R/alevin-loadFry.R) so that the fetched datasets can be directly load into R as SingleCellExperiment objects. When using this function, the `outputFormat` parameter can be specified for each fetched dataset separately by providing a list of valid `outputFormat`s, named by the corresponding dataset ids. Similarly, the `nonzero` parameter can also be specified for each dataset by providing a list of valid `nonzero`s, named by the corresponding dataset ids. The following example shows how to define `output_format` in different ways.  
+
+```R
+load_processed_quant(dataset_ids = c(1, 2),
+        fetch_dir = "processed_quant",
+        force = FALSE,
+        delete_tar = TRUE,
+        output_format = "scRNA",
+#         output_format = list("scRNA", "scRNA"),
+#         output_format = list("1" = list(counts = c("S", "A")),
+#                               "2" = list(counts = c("S", "A"))
+#                              ),
+#         output_format = list("counts" = c("S", "A")),
+        nonzero = FALSE,
+        quiet = FALSE
+)
+}
+
 ```
