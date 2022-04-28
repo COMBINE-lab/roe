@@ -25,21 +25,30 @@
 #' @details
 #' This function is a thin wrapper of the \code{\link[fishpond]{loadFry}}
 #' function and \code{\link{fetch_processed_quant}} function. This function will
-#' download the preprocessed 10x datasets from a remote host and load
-#' them into R as a SingleCellExperiment object or a list of it if
-#' querying multiple datasets. To list all available datasets,
-#' simply run \code{fetch_processed_quant()}
+#' fetch the quantification result of each dataset in the provided
+#' `dataset_ids` into the `fetch_dir` directory, and load the
+#' quantification result of each fetched dataset into R as a
+#' SingleCellExperiment object. This function returns a list of lists,
+#' in which each list stores the information of a fetched dataset, and
+#' the SingleCellExperiment of that dataset.
+#' To list all available datasets,
+#' simply run \code{load_processed_quant()}.
 #' This function takes the combination
 #' of the parameters of the \code{\link[fishpond]{loadFry}}
 #' function and \code{\link{fetch_processed_quant}} function. For
 #' each of the \code{\link[fishpond]{loadFry}} parameters,
 #' a list of that parameter can be specified, each for a
-#' queried dataset.
+#' fetched dataset.
 #' 
 #' @export
 #'
-#' @return A of SingleCellExperiment object(s) will be returned, each item
-#' represent one queried dataset.
+#' @return If an empty dataset_ids is provided,
+#' a data frame containing the information of available datasets
+#' will be returned; otherwise, a list of lists, where each list
+#' stores the information of one fetched dataset. The `quant_dir`
+#' field represent the path to the quantification result of the 
+#' fetched dataset; The `sce` field represent the SingleCellExperiment
+#' of this dataset.
 #'
 #' @examples
 #' 
@@ -124,30 +133,33 @@ load_processed_quant <- function(dataset_ids = c(),
     .say(quiet, "Fetching datasets")
 
     # download the datsets
-    dataset_paths <- fetch_processed_quant(dataset_ids = dataset_ids,
+    dataset_list <- fetch_processed_quant(dataset_ids = dataset_ids,
                                             fetch_dir = fetch_dir,
                                             force = force,
                                             delete_tar =  delete_tar,
                                             quiet = quiet
                                             )
 
-    sce_list <- list()
+    processed_dataset_list <- list()
     # process them using user output
     for (dataset_id in dataset_ids) {
         dataset_id <- as.character(dataset_id)
         .say(quiet, "Loading dataset ", dataset_id)
-
-        dataset_path_ds <- dataset_paths[dataset_id]
+        quant_dir_ds <- dataset_list[[dataset_id]][["quant_dir"]]
         output_format_ds <- output_format[[dataset_id]]
         nonzero_ds <- nonzero[[dataset_id]]
-        sce_list[[dataset_id]] <-
-                            fishpond::loadFry(fryDir = dataset_path_ds,
+
+        processed_dataset = .get_dataset_info_list(available_datasets, dataset_id)
+        processed_dataset[["quant_dir"]] <- quant_dir_ds
+        processed_dataset[["sce"]] <-
+                            fishpond::loadFry(fryDir = quant_dir_ds,
                                                 outputFormat = output_format_ds,
                                                 nonzero = nonzero_ds,
                                                 quiet = quiet
                         )
+        processed_dataset_list[[dataset_id]] <- processed_dataset
     }
 
     # output
-    sce_list
+    processed_dataset_list
 }

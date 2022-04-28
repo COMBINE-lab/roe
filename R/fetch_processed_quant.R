@@ -68,7 +68,7 @@
 #' \item \href{https://www.10xgenomics.com/resources/datasets/1-k-heart-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Heart Cells from an E18 mouse (v2 chemistry)}
 #' }
 #' To obtain these information as a data frame, one can simply run
-#' `preprocessed_10x_data()` in R.
+#' `fetch_processed_quant()` in R.
 #' Note that because the name of datasets are too long, the stored
 #' datasets are named by the MD5 hash value of their fastqs.tar file.
 #' If one would like to use the downloaded quantification results
@@ -77,10 +77,11 @@
 #'
 #' @export
 #'
-#' @return If return_available_dataset_df is set as true,
-#' a data frame containing all available datasets will be returned;
-#' otherwise, a vector of local paths to the downloaded datasets
-#' will be returned.
+#' @return If an empty dataset_ids is provided,
+#' a data frame containing the information of available datasets will be returned;
+#' otherwise, a list of lists, in which each list stores the information of one 
+#' fetched dataset. The `quant_dir` field represetn the path to the quantification
+#' result of the fetched dataset.
 #'
 #' @examples
 #' 
@@ -88,7 +89,7 @@
 #' library(roe)
 #' # run the function
 #' available_datasets = load_processed_quant()
-#' load_processed_quant(dataset_id = c(1, 2),
+#' fetch_processed_quant(dataset_id = c(1, 2),
 #'                        fetch_dir = "processed_quant",
 #'                        force = FALSE,
 #'                        delete_tar = TRUE,
@@ -107,7 +108,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
                               ) {
 
   # available_datasets = read.csv("available_datasets.tsv", sep = "\t")
-  # usethis::use_data(available_datasets, internal = TRUE)
+  # usethis::use_data(available_datasets, internal = TRUE, force = TRUE)
 
   # if the user just wants the data frame, return it
   if (length(dataset_ids) == 0) {
@@ -136,7 +137,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
   }
 
   # download the quantification tar file for each queried dataset.
-  quant_dir_list <- c()
+  processed_dataset_list <- list()
   # folder for (temporarily) storing tar files.
   tar_dir <- file.path(fetch_dir, "datasets_tar")
   dir.create(tar_dir, recursive = TRUE,
@@ -144,6 +145,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
 
   for (dataset_id in dataset_ids) {
     .say(quiet, "\n\nProceeding dataset #", dataset_id)
+    processed_dataset <- .get_dataset_info_list(available_datasets, dataset_id)
 
     # specify paths
     quant_parent_dir <- file.path(fetch_dir,
@@ -151,11 +153,15 @@ fetch_processed_quant <- function(dataset_ids = c(),
                         )
 
     tar_file <- file.path(tar_dir,
-                            paste0(available_datasets[dataset_id, "MD5"],
+                            paste0(processed_dataset[["dataset_id"]],
                                   ".tar")
                                   )
 
-    # process if needed
+    if (!delete_tar) {
+      processed_dataset[["tar_path"]] <- tar_file
+    }
+
+    # process it if needed
     if (file.exists(quant_parent_dir)) {
       .say(quiet, "    output dir exists: \n    ", quant_parent_dir, "\n")
 
@@ -163,16 +169,16 @@ fetch_processed_quant <- function(dataset_ids = c(),
         .say(quiet, "    force re-processing")
         unlink(quant_parent_dir, recursive = TRUE, force = TRUE)
       } else {
-        quant_dir <- list.dirs(quant_parent_dir,
-                                full.names = TRUE,
-                                recursive = FALSE)
-        quant_dir_list <- c(quant_dir_list, quant_dir)
+        processed_dataset[["quant_dir"]] <- list.dirs(quant_parent_dir,
+                                                      full.names = TRUE,
+                                                      recursive = FALSE)
+        processed_dataset_list[[as.character(dataset_id)]] <- processed_dataset
         next
       }
     }
 
     .say(quiet, "    Downloading alevin-fry quant folder")
-    url <- available_datasets[dataset_id, "quant_link"]
+    url <- processed_dataset[["quant_link"]]
     utils::download.file(url = url,
                           destfile = tar_file,
                           quiet = TRUE,
@@ -182,13 +188,12 @@ fetch_processed_quant <- function(dataset_ids = c(),
     utils::untar(tarfile = tar_file,
                   exdir = quant_parent_dir
                 )
-    quant_dir <- list.dirs(quant_parent_dir,
-                            full.names = TRUE,
-                            recursive = FALSE)
+    processed_dataset[["quant_dir"]] <- list.dirs(quant_parent_dir,
+                                                  full.names = TRUE,
+                                                  recursive = FALSE)
 
-    quant_dir_list <- c(quant_dir_list, quant_dir)
+    processed_dataset_list[[as.character(dataset_id)]] <- processed_dataset_list
     .say(quiet, "\n")
-
   }
 
   if (delete_tar) {
@@ -197,6 +202,6 @@ fetch_processed_quant <- function(dataset_ids = c(),
   }
   .say(quiet, "Done")
 
-  names(quant_dir_list) <- dataset_ids
-  quant_dir_list
+  processed_dataset_list
 }
+
