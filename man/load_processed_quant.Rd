@@ -46,8 +46,12 @@ will be processed using the corresponding \code{nonzero}.}
 \item{quiet}{logical whether to display no messages}
 }
 \value{
-A of SingleCellExperiment object(s) will be returned, each item
-represent one queried dataset.
+If an empty dataset_ids is provided,
+a data frame containing the information of available datasets will be returned;
+otherwise, a list of lists, where each list stores the information of one 
+fetched dataset. The `quant_dir` field represent the path to the quantification
+result of the fetched dataset; The `sce` field represent the SingleCellExperiment
+of this dataset.
 }
 \description{
 Fetch and load preprocessed 10x datasets as SingleCellExperiment objects.
@@ -55,16 +59,20 @@ Fetch and load preprocessed 10x datasets as SingleCellExperiment objects.
 \details{
 This function is a thin wrapper of the \code{\link[fishpond]{loadFry}}
 function and \code{\link{fetch_processed_quant}} function. This function will
-download the preprocessed 10x datasets from a remote host and load
-them into R as a SingleCellExperiment object or a list of it if
-querying multiple datasets. To list all available datasets,
-simply run \code{fetch_processed_quant()}
+fetch the quantification result of each dataset in the provided 
+`dataset_ids` into the `fetch_dir` directory, and load the 
+quantification result of each fetched dataset into R as a 
+SingleCellExperiment object. This function returns a list of lists, 
+in which each list stores the information of a fetched dataset, and 
+the SingleCellExperiment of that dataset.
+To list all available datasets,
+simply run \code{load_processed_quant()}.
 This function takes the combination
 of the parameters of the \code{\link[fishpond]{loadFry}}
 function and \code{\link{fetch_processed_quant}} function. For
 each of the \code{\link[fishpond]{loadFry}} parameters,
 a list of that parameter can be specified, each for a
-queried dataset.
+fetched dataset.
 }
 \examples{
 

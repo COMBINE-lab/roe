@@ -31,10 +31,11 @@ under the \code{fetch_dir}.}
 \item{quiet}{logical whether to display no messages.}
 }
 \value{
-If return_available_dataset_df is set as true,
-a data frame containing all available datasets will be returned;
-otherwise, a vector of local paths to the downloaded datasets
-will be returned.
+If an empty dataset_ids is provided,
+a data frame containing the information of available datasets will be returned;
+otherwise, a list of lists, in which each list stores the information of one 
+fetched dataset. The `quant_dir` field represetn the path to the quantification
+result of the fetched dataset.
 }
 \description{
 Construct the splici transcriptome for alevin-fry.
@@ -89,7 +90,7 @@ Currently, the datasets that are available for querying include:
 \item \href{https://www.10xgenomics.com/resources/datasets/1-k-heart-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Heart Cells from an E18 mouse (v2 chemistry)}
 }
 To obtain these information as a data frame, one can simply run
-`preprocessed_10x_data()` in R.
+`fetch_processed_quant()` in R.
 Note that because the name of datasets are too long, the stored
 datasets are named by the MD5 hash value of their fastqs.tar file.
 If one would like to use the downloaded quantification results
@@ -102,8 +103,8 @@ corresponding datasets to find the MD5 hash value.
 library(roe)
 # run the function
 available_datasets = load_processed_quant()
-load_processed_quant(dataset_id = c(1, 2),
-                       fetch_dir = "10x_datasets",
+fetch_processed_quant(dataset_id = c(1, 2),
+                       fetch_dir = "processed_quant",
                        force = FALSE,
                        delete_tar = TRUE,
                        quiet = FALSE
