@@ -1,9 +1,16 @@
+#' return the dataframe that contains the details of all 
+#' available datasets.
+#' @export
+
 get_available_dataset_df <- function() {
     # available_datasets = read.csv("available_datasets.tsv", sep = "\t")
     # usethis::use_data(available_datasets, internal = TRUE, force = TRUE)
     available_datasets
 }
 
+#' print the index and the name of available datasets.
+#'
+#' @export
 print_available_datasets <- function() {
     for (dataset_id in seq(nrow(available_datasets))) {
         cat(paste0(dataset_id,
@@ -12,6 +19,15 @@ print_available_datasets <- function() {
                     "\n"))
     }
 }
+
+
+#' initiate the processed_quant list used for recording the 
+#' information of a specific dataset
+#' @param dataset_id the id of an available dataset. 
+#' Run \code{print_available_datasets()} for all available
+#' datasets.
+#' 
+#' @export
 
 init_processed_quant <- function(dataset_id) {
     if ((is.numeric(dataset_id))) {
@@ -40,6 +56,20 @@ init_processed_quant <- function(dataset_id) {
     processed_quant
 }
 
+#' fetch the compressed quantification result of a 
+#' specific dataset and stroe the path to the tar file 
+#' in the tar_path field of the returned processed_quant list.
+#' This function must be run after \code{init_processed_quant()}
+#' 
+#' @param processed_quant a list recording the details of 
+#' a dataset. Initialized by \code{init_processed_quant(dataset_id)}
+#' @param tar_dir a string to a path where the fetched tar files will
+#' be stored. It will be created if does not exist.
+#' @param file_name a string indicates the name of the tar file. If NULL,
+#' the dataset_id will be used as the file name.
+#' @param force logic whether to proceed if the tar file exists.
+#' @param quiet logical whether to display no messages
+#' @export
 
 fetch_tar <- function(processed_quant,
                         tar_dir="quant_tar",
@@ -101,6 +131,22 @@ fetch_tar <- function(processed_quant,
         "    ", processed_quant$tar_path
         )
 }
+
+#' decompress the fetched quantification result of a 
+#' specific dataset and record the path 
+#' as the quant_path field of the returned processed_quant list
+#' This function must be run after \code{fetch_tar()}
+#' 
+#' @param processed_quant a list recording the details of 
+#' a dataset. Initialized by \code{init_processed_quant(dataset_id)}
+#' @param quant_dir a string to a path where the fetched tar files will
+#' be stored. It will be created if does not exist.
+#' @param quant_path_name a string indicates the name of the directory 
+#' that will be used for storing the quantification result. If NULL,
+#' the dataset_id will be used as the file name.
+#' @param force logic whether to proceed if the tar file exists.
+#' @param quiet logical whether to display no messages
+#' @export
 
 decompress_tar <- function(processed_quant,
                            quant_dir="processed_quant",
@@ -167,6 +213,22 @@ decompress_tar <- function(processed_quant,
     return(processed_quant)
 }
 
+#' load the fetched quantification result of a 
+#' specific dataset as a SingleCellExperiment object
+#' and store it in the sce field of the returned
+#'  processed_quant list.
+#' This function must be run after \code{decompress_tar()}
+#' 
+#' @param processed_quant a list recording the details of 
+#' a dataset. 
+#' @param output_format the format of the returned SingleCellExperiement
+#' object. It will be passed to \code{\link[fishpond]{loadFry}}
+#' as the \code{outputFormat} parameter. 
+#' @param nonzero It will be passed to \code{\link[fishpond]{loadFry}}
+#' as the \code{nonzero} parameter. 
+#' @param quiet logical whether to display no messages
+#' @export
+
 load_quant <- function(processed_quant,
                        output_format="scRNA",
                        nonzero = FALSE,
@@ -194,6 +256,31 @@ load_quant <- function(processed_quant,
     return(processed_quant)
 }
 
+#' fetch, decompress and load the quantification result of a 
+#' specific dataset as a SingleCellExperiment object
+#' and store it in the sce field of the returned
+#' processed_quant list.
+#' 
+#' @param dataset_id the id of an available dataset. 
+#' Run \code{print_available_datasets()} for all available
+#' datasets.
+#' @param tar_dir a string to a path where the fetched tar files will
+#' be stored. It will be created if does not exist.
+#' @param tar_file_name a string indicates the name of the tar file. If NULL,
+#' the dataset_id will be used as the file name.
+#' @param quant_dir a string to a path where the fetched tar files will
+#' be stored. It will be created if does not exist.
+#' @param quant_path_name a string indicates the name of the directory 
+#' that will be used for storing the quantification result. If NULL,
+#' the dataset_id will be used as the file name.
+#' @param output_format the format of the returned SingleCellExperiement
+#' object. It will be passed to \code{\link[fishpond]{loadFry}}
+#' as the \code{outputFormat} parameter. 
+#' @param nonzero It will be passed to \code{\link[fishpond]{loadFry}}
+#' as the \code{nonzero} parameter. 
+#' @param quiet logical whether to display no messages
+#' @export
+#' 
 FDL <- function(dataset_id,
                 tar_dir="quant_tar",
                 tar_file_name=NULL,
