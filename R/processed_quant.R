@@ -130,6 +130,7 @@ fetch_tar <- function(processed_quant,
         "  - Fetched quant tar is saved as:\n",
         "    ", processed_quant$tar_path
         )
+    return(processed_quant)
 }
 
 #' decompress the fetched quantification result of a 
@@ -163,7 +164,9 @@ decompress_tar <- function(processed_quant,
     
     .say(quiet, 
          "Decompressing the quant result of dataset #",
-         processed_quant$dataset_id
+         processed_quant$dataset_id, "using: \n",
+         "  ", processed_quant$tar_path
+         
     )
     
     # if quant_path is not null, return unless force=TRUE
@@ -210,6 +213,11 @@ decompress_tar <- function(processed_quant,
                                                   full.names = TRUE,
                                                   recursive = FALSE)
     
+        
+    say(quiet, 
+        "  - Decompressed quant result is saved as:\n",
+        "    ", processed_quant$quant_path
+        )
     return(processed_quant)
 }
 
@@ -243,9 +251,9 @@ load_quant <- function(processed_quant,
     }
 
     .say(quiet, 
-         "Decompressing the quant result of dataset #",
+         "Loading dataset #",
          processed_quant$dataset_id,
-         " from: ",
+         " from:\n  ",
          processed_quant$quant_path
     )
     processed_quant$sce <- fishpond::loadFry(fryDir = processed_quant$quant_path,
@@ -330,7 +338,7 @@ check_validity <- function(processed_quant) {
         is.null(processed_quant$library_csv),
         is.null(processed_quant$quant_link)
     ))) {
-        stop(paste0("Invalid dataset info list, use init_",
+        stop(paste0("Invalid processed_quant, use init_",
                     "processed_quant(dataset_id) to ",
                     "initiate a valid one.")
             )
