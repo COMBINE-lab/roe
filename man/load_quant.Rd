@@ -6,7 +6,7 @@
 specific dataset as a SingleCellExperiment object
 and store it in the sce field of the returned
  processed_quant list.
-This function must be run after \code{decompress_tar()}}
+This function must be run after \code{decompress_quant()}}
 \usage{
 load_quant(
   processed_quant,
@@ -33,5 +33,5 @@ load the fetched quantification result of a
 specific dataset as a SingleCellExperiment object
 and store it in the sce field of the returned
  processed_quant list.
-This function must be run after \code{decompress_tar()}
+This function must be run after \code{decompress_quant()}
 }

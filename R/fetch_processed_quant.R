@@ -152,13 +152,13 @@ fetch_processed_quant <- function(dataset_ids = c(),
         processed_quant <- init_processed_quant(dataset_id)
 
         # fetch it
-        processed_quant <- fetch_tar(processed_quant,
+        processed_quant <- fetch_quant(processed_quant,
                                     tar_dir = tar_dir,
                                     force = force,
                                     quiet = quiet)
 
         # decompress it
-        processed_quant <- decompress_tar(processed_quant,
+        processed_quant <- decompress_quant(processed_quant,
                                             quant_dir = fetch_dir,
                                             force = force,
                                             quiet = quiet)

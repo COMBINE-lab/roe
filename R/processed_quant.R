@@ -71,7 +71,7 @@ init_processed_quant <- function(dataset_id) {
 #' @param quiet logical whether to display no messages
 #' @export
 
-fetch_tar <- function(processed_quant,
+fetch_quant <- function(processed_quant,
                         tar_dir="quant_tar",
                         file_name=NULL,
                         force=FALSE,
@@ -86,12 +86,14 @@ fetch_tar <- function(processed_quant,
     # if tar_path is not null, return unless force=TRUE
     if (!is.null(processed_quant$tar_path)) {
         if (file.exists(processed_quant$tar_path)) {
-            .say(quiet,
-                "  - The processed_quant$tar_path is not ",
-                "NULL and the path exists:\n",
-                "    ", processed_quant$tar_path, "\n",
-                "  - Pass force=True to update it")
-            return(processed_quant)
+            if (!force) {
+                .say(quiet,
+                    "  - The processed_quant$tar_path is not ",
+                    "NULL and the path exists:\n",
+                    "    ", processed_quant$tar_path, "\n",
+                    "  - Pass force=TRUE to update it")
+                return(processed_quant)
+            }
         }
     }
 
@@ -115,7 +117,7 @@ fetch_tar <- function(processed_quant,
             .say(quiet,
                 "  - Use the existing file as tar_path:\n",
                 "    ", tar_file, "\n",
-                "  - Pass force=True to overwrite it")
+                "  - Pass force=TRUE to overwrite it")
             processed_quant$tar_path = tar_file
             return(processed_quant)
         }
@@ -139,7 +141,7 @@ fetch_tar <- function(processed_quant,
 #' decompress the fetched quantification result of a
 #' specific dataset and record the path
 #' as the quant_path field of the returned processed_quant list
-#' This function must be run after \code{fetch_tar()}
+#' This function must be run after \code{fetch_quant()}
 #' 
 #' @param processed_quant a list recording the details of
 #' a dataset. Initialized by \code{init_processed_quant(dataset_id)}
@@ -152,7 +154,7 @@ fetch_tar <- function(processed_quant,
 #' @param quiet logical whether to display no messages
 #' @export
 
-decompress_tar <- function(processed_quant,
+decompress_quant <- function(processed_quant,
                             quant_dir="processed_quant",
                             quant_path_name=NULL,
                             force=FALSE,
@@ -161,7 +163,7 @@ decompress_tar <- function(processed_quant,
 
     if (is.null(processed_quant$tar_path)) {
         stop("tar_path field is NULL, ",
-            "run processed_quant = fetch_tar(processed_quant) ",
+            "run processed_quant = fetch_quant(processed_quant) ",
             "to fetch the tar file.")
     }
 
@@ -174,11 +176,13 @@ decompress_tar <- function(processed_quant,
     # if quant_path is not null, return unless force=TRUE
     if (!is.null(processed_quant$quant_path)) {
         if (file.exists(processed_quant$quant_path)) {
-            .say(quiet,
-                "  - Use the existing directory as quant_path:\n",
-                "    ", processed_quant$quant_path, "\n",
-                "  - Pass force=True to update it")
-            return(processed_quant)
+            if (!force) {
+                .say(quiet,
+                    "  - Use the existing directory as quant_path:\n",
+                    "    ", processed_quant$quant_path, "\n",
+                    "  - Pass force=TRUE to update it")
+                return(processed_quant)
+            }
         }
     }
 
@@ -204,7 +208,7 @@ decompress_tar <- function(processed_quant,
             .say(quiet,
                 "  - Use the existing directory as quant_path:",
                 "    ", processed_quant$quant_path,
-                "  - pass force=True to overwrite it")
+                "  - pass force=TRUE to overwrite it")
             return(processed_quant)
         }
     }
@@ -228,8 +232,8 @@ decompress_tar <- function(processed_quant,
 #' load the fetched quantification result of a
 #' specific dataset as a SingleCellExperiment object
 #' and store it in the sce field of the returned
-#'  processed_quant list.
-#' This function must be run after \code{decompress_tar()}
+#'  processed_quant list as the sce field.
+#' This function must be run after \code{decompress_quant()}
 #' 
 #' @param processed_quant a list recording the details of
 #' a dataset. 
@@ -238,12 +242,14 @@ decompress_tar <- function(processed_quant,
 #' as the \code{outputFormat} parameter.
 #' @param nonzero It will be passed to \code{\link[fishpond]{loadFry}}
 #' as the \code{nonzero} parameter.
+#' @param force logic whether to proceed if the sce field exists.
 #' @param quiet logical whether to display no messages
 #' @export
 
 load_quant <- function(processed_quant,
                         output_format="scRNA",
                         nonzero = FALSE,
+                        force = TRUE,
                         quiet = FALSE) {
     check_validity(processed_quant)
 
@@ -265,7 +271,7 @@ load_quant <- function(processed_quant,
         .say(quiet,
             "  - The sce field of the passed processed_",
             "quant list is not NULL\n",
-            "  - Pass force=True to update it\n")
+            "  - Pass force=TRUE to update it\n")
         return(processed_quant)
     }
 
@@ -323,14 +329,14 @@ FDL <- function(dataset_id,
     processed_quant = init_processed_quant(dataset_id)
 
     # fetch it
-    processed_quant = fetch_tar(processed_quant,
+    processed_quant = fetch_quant(processed_quant,
                                 tar_dir = tar_dir,
                                 file_name = tar_file_name,
                                 force = force,
                                 quiet = quiet)
 
     # decompress it
-    processed_quant = decompress_tar(processed_quant,
+    processed_quant = decompress_quant(processed_quant,
                                     quant_dir = quant_dir,
                                     quant_path_name = quant_path_name,
                                     force = force,

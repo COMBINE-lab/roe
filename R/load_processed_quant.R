@@ -9,8 +9,8 @@
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' See \code{\link{fetch_processed_quant}} for details.
-#' @param keep_tar logical whether to delete the intermediate 
-#' compressed datasets.
+#' @param keep_tar logical whether to delete the intermediate
+#' compressed datasets. The default is TRUE 
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param output_format can be \emph{either} a valid
 #' \code{\link[fishpond]{loadFry}} \code{outputFormat}
@@ -92,7 +92,7 @@ load_processed_quant <- function(dataset_ids = c(),
         return (available_datasets)
     }
 
-    dataset_ids = check_dataset_ids(dataset_ids)
+    dataset_ids <- check_dataset_ids(dataset_ids)
     # check whether there is any dataset id left
     if (length(dataset_ids) == 0) {
         stop("No valid dataset id found, can not proceed")
@@ -148,10 +148,10 @@ load_processed_quant <- function(dataset_ids = c(),
 
     # process them using user output
     for (dataset_id in dataset_ids) {
-        output_format_ds <- output_format[[dataset_id]]
-        nonzero_ds <- nonzero[[dataset_id]]
+        output_format_ds <- output_format[[as.character(dataset_id)]]
+        nonzero_ds <- nonzero[[as.character(dataset_id)]]
 
-        processed_dataset <- FDL(dataset_id,
+        processed_quant <- FDL(dataset_id,
                                 tar_dir = tar_dir,
                                 quant_dir = fetch_dir,
                                 output_format = output_format_ds,
