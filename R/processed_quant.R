@@ -117,7 +117,9 @@ decompress_tar <- function(processed_quant,
     
     .say(quiet, 
          "Decompressing the quant result of dataset #",
-         processed_quant$dataset_id
+         processed_quant$dataset_id, "using: \n",
+         "  ", processed_quant$tar_path
+         
     )
     
     # if quant_path is not null, return unless force=TRUE
