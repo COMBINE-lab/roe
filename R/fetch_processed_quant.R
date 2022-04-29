@@ -123,102 +123,64 @@ fetch_processed_quant <- function(dataset_ids = c(),
                                   keep_tar = TRUE,
                                   quiet = FALSE
                                 ) {
-
-  # available_datasets = read.csv("available_datasets.tsv", sep = "\t")
-  # usethis::use_data(available_datasets, internal = TRUE, force = TRUE)
-
-  # if the user just wants the data frame, return it
-  if (length(dataset_ids) == 0) {
-    return(available_datasets)
-  }
-
-  .say(quiet, "Check the validity of dataset_ids")
-
-  # now check the validity of dataset_ids
-  if (is.numeric(dataset_ids)) {
-    valid_ids <- (dataset_ids >= 1) &
-                    (dataset_ids <= nrow(available_datasets))
-    if (any(!valid_ids)) {
-      message("Found invalid dataset id: '",
-              paste0(dataset_ids[!valid_ids], collapse = "' '"),
-              "', ignored")
-      dataset_ids <- dataset_ids[valid_ids]
+  
+    # available_datasets = read.csv("available_datasets.tsv", sep = "\t")
+    # usethis::use_data(available_datasets, internal = TRUE, force = TRUE)
+  
+    # if the user just wants the data frame, return it
+    if (length(dataset_ids) == 0) {
+        return(available_datasets)
     }
-  } else {
-    stop("dataset ids must be integer")
-  }
-
-  # check whether there is any dataset id left
-  if (length(dataset_ids) == 0) {
-    stop("No valid dataset id found, can not proceed")
-  }
-
-  # download the quantification tar file for each queried dataset.
-  processed_dataset_list <- list()
-  # folder for (temporarily) storing tar files.
-  tar_dir <- file.path(fetch_dir, "datasets_tar")
-  dir.create(tar_dir, recursive = TRUE,
-              showWarnings = FALSE)
-
-  for (dataset_id in dataset_ids) {
-    .say(quiet, "\n\nProceeding dataset #", dataset_id)
-    processed_dataset <- .get_dataset_info_list(available_datasets, dataset_id)
-
-    # specify paths
-    quant_parent_dir <- file.path(fetch_dir,
-                          dataset_id
-                        )
-
-    tar_file <- file.path(tar_dir,
-                            paste0(processed_dataset[["dataset_id"]],
-                                  ".tar")
-                                  )
-
+  
+    .say(quiet, "Checking provided dataset ids")
+  
+    dataset_ids = check_dataset_ids(dataset_ids)
+    # check whether there is any dataset id left
+    if (length(dataset_ids) == 0) {
+        stop("No valid dataset id found, can not proceed")
+    }
+  
+    # download the quantification tar file for each queried dataset.
+    pq_list <- list()
+    # folder for (temporarily) storing tar files.
+    tar_dir <- file.path(fetch_dir, "datasets_tar")
+    dir.create(tar_dir, recursive = TRUE,
+                showWarnings = FALSE)
+  
+    for (dataset_id in dataset_ids) {
+        # init processed_quant
+        processed_quant = init_processed_quant(dataset_id)
+        
+        # fetch it
+        processed_quant = fetch_tar(processed_quant,
+                                    tar_dir=tar_dir,
+                                    file_name=tar_file_name,
+                                    force=force,
+                                    quiet=quiet)
+        
+        # decompress it
+        processed_quant = decompress_tar(processed_quant,
+                                         quant_dir=quant_dir,
+                                         quant_path_name=quant_path_name,
+                                         force=force,
+                                         quiet=quiet)
+        
+        # reset tar_path if needed
+        if (!keep_tar) {
+            processed_quant$tar_path = NULL
+        }
+        
+        # append to list
+        pq_list[[as.character(dataset_id)]] = processed_quant
+    }
+    
     if (!keep_tar) {
-      processed_dataset[["tar_path"]] <- tar_file
+        .say(quiet,
+             "Removing downloaded tar files in directory:\n",
+             "  ", tar_dir)
+        unlink(tar_dir,  recursive = TRUE, force = TRUE)
     }
-
-    # process it if needed
-    if (file.exists(quant_parent_dir)) {
-      .say(quiet, "    output dir exists: \n    ", quant_parent_dir, "\n")
-
-      if (force) {
-        .say(quiet, "    force re-processing")
-        unlink(quant_parent_dir, recursive = TRUE, force = TRUE)
-      } else {
-        processed_dataset[["quant_dir"]] <- list.dirs(quant_parent_dir,
-                                                      full.names = TRUE,
-                                                      recursive = FALSE)
-        processed_dataset_list[[as.character(dataset_id)]] <- processed_dataset
-        next
-      }
-    }
-
-    .say(quiet, "    Downloading alevin-fry quant folder")
-    url <- processed_dataset[["quant_link"]]
-    utils::download.file(url = url,
-                          destfile = tar_file,
-                          quiet = TRUE,
-                          cacheOK = FALSE)
-
-    .say(quiet, "    Decompressing alevin-fry quant folder")
-    utils::untar(tarfile = tar_file,
-                  exdir = quant_parent_dir
-                )
-    processed_dataset[["quant_dir"]] <- list.dirs(quant_parent_dir,
-                                                  full.names = TRUE,
-                                                  recursive = FALSE)
-
-    processed_dataset_list[[as.character(dataset_id)]] <- processed_dataset_list
-    .say(quiet, "\n")
-  }
-
-  if (keep_tar) {
-    .say(quiet, "Delete temp tar files")
-    unlink(tar_dir,  recursive = TRUE, force = TRUE)
-  }
-  .say(quiet, "Done")
-
-  processed_dataset_list
+    
+    .say(quiet, "Done")
+    return(pq_list)
 }
-

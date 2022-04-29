@@ -13,17 +13,17 @@ print_available_datasets <- function() {
     }
 }
 
-init_dataset_info_list <- function(dataset_id) {
+init_processed_quant <- function(dataset_id) {
     if ((is.numeric(dataset_id))) {
         if (!((dataset_id >= 1) & (dataset_id <= nrow(available_datasets)))) {
-            stop(paste0("Invalid dataset_id, run print_available_datasets()",
-                        " to get available dataset ids."))
+            stop("Invalid dataset_id, run print_available_datasets()",
+                " to get available dataset ids.")
         }
     } else {
-        stop(paste0("Invalid dataset_id type, accepts integer only."))
+        stop("Invalid dataset_id type, accepts integer only.")
     }
     dataset_info <- available_datasets[dataset_id, ]
-    dataset_info_list <- list(dataset_id = dataset_info$"dataset_id",
+    processed_quant <- list(dataset_id = dataset_info$"dataset_id",
                             chemistry = dataset_info$"chemistry",
                             reference = dataset_info$"reference",
                             dataset_name = dataset_info$"dataset_name",
@@ -37,88 +37,229 @@ init_dataset_info_list <- function(dataset_id) {
                             tar_path = NULL,
                             sce = NULL
     )
-    dataset_info_list
+    processed_quant
 }
 
 
-fetch_tar <- function(dataset_info_list,
+fetch_tar <- function(processed_quant,
                         tar_dir="quant_tar",
                         file_name=NULL,
                         force=FALSE,
                         quiet=FALSE) {
-    # check validity of dataset_info_list
-    check_validity(dataset_info_list)
-    .say(quiet, paste0("Fetching the quant result of dataset #",
-                        dataset_info_list[["dataset_id"]]))
+    # check validity of processed_quant
+    check_validity(processed_quant)
+    .say(quiet, 
+         "Fetching the quant result of dataset #",
+         processed_quant$dataset_id
+        )
 
-    if ((!is.null(dataset_info_list[["tar_path"]])) &
-        file.exists(dataset_info_list[["tar_path"]])) {
-        .say(quiet, "  - The tar_path field is not None and the path exists:")
-        .say(quiet, "    ", dataset_info_list[["tar_path"]], "\n")
-        .say(quiet, "  - Pass force=True to fetch it again\n")
-        return(dataset_info_list)
+    # if tar_path is not null, return unless force=TRUE
+    if (file.exists(processed_quant$tar_path)) {
+        .say(quiet,
+             "  - The processed_quant$tar_path exists:\n",
+             "    ", processed_quant$tar_path, "\n",
+             "  - Pass force=True to update it\n")
+        return(processed_quant)
     }
 
     dir.create(tar_dir, recursive = TRUE,
                 showWarnings = FALSE)
 
     if (is.null(file_name)) {
-        file_name <- paste0(dataset_info_list[["dataset_id"]], ".tar")
+        file_name <- paste0(processed_quant$dataset_id, ".tar")
     } else if (!endsWith(file_name, ".tar")) {
         file_name <- paste0(file_name, ".tar")
-    }
-
+    }    
+    
     tar_file <- file.path(tar_dir, file_name)
 
-    .say(quiet, "    Downloading alevin-fry quant folder")
-    url <- dataset_info_list[["quant_link"]]
+    if (file.exists(tar_file)) {
+        if (force) {
+            .say(quiet,
+                 "  - Overwriting the existing tar file:\n",
+                 "    ", tar_file, "\n")
+        } else {
+            .say(quiet,
+                 "  - Use the existing file as tar_path:\n",
+                 "    ", tar_file, "\n",
+                 "  - Pass force=True to overwrite it\n")
+            processed_quant$tar_path = tar_file
+            return(processed_quant)
+        }
+    }
+
+    url <- processed_quant$quant_link
     utils::download.file(url = url,
                         destfile = tar_file,
                         quiet = TRUE,
-                        cacheOK = FALSE)
-
-    .say(quiet, "    Decompressing alevin-fry quant folder")
-    utils::untar(tarfile = tar_file,
-                exdir = quant_parent_dir
-                )
-    dataset_info_list[["quant_dir"]] <- list.dirs(quant_parent_dir,
-                                                full.names = TRUE,
-                                                recursive = FALSE)
-
-    dataset_info_list_list[[as.character(dataset_id)]] <- dataset_info_list_list
-    .say(quiet, "\n")
+                        cacheOK = FALSE
+                        )
+    processed_quant$tar_path = tar_file
+    
+    say(quiet, 
+        "  - Fetched quant tar is saved as:\n",
+        "    ", processed_quant$tar_path
+        )
 }
 
-check_validity <- function(dataset_info_list) {
+decompress_tar <- function(processed_quant,
+                           quant_dir="processed_quant",
+                           quant_path_name=None,
+                           force=FALSE,
+                           quiet=FALSE) {
+    check_validity(processed_quant)
+    
+    if (is.null(processed_quant$tar_path)) {
+        stop("tar_path field is NULL, ",
+             "run processed_quant = fetch_tar(processed_quant) ",
+             "to fetch the tar file.")
+    }
+    
+    .say(quiet, 
+         "Decompressing the quant result of dataset #",
+         processed_quant$dataset_id
+    )
+    
+    # if quant_path is not null, return unless force=TRUE
+    if (file.exists(processed_quant$quant_path)) {
+        .say(quiet,
+             "  - Use the existing directory as quant_path:\n",
+             "    ", processed_quant$quant_path, "\n",
+             "  - Pass force=True to update it\n")
+        return(processed_quant)
+    }
+    
+    # check quant_path_name
+    if (is.null(quant_path_name)) {
+        quant_path_name = paste0(processed_quant$dataset_id)
+    }
+    
+    # specify paths
+    quant_parent_dir <- file.path(fetch_dir, quant_path_name)
+
+    # check quant_parent_dir
+    if (file.exists(quant_parent_dir)) {
+        if (force) {
+            .say(quiet,
+                 "  - Removing existing quant folder:\n",
+                 "    ", quant_parent_dir)
+            unlink(quant_parent_dir, recursive = TRUE, force = TRUE)
+        } else {
+            processed_quant$quant_path <- list.dirs(quant_parent_dir,
+                                                           full.names = TRUE,
+                                                           recursive = FALSE)
+            say(quiet, 
+                "  - Use the existing directory as quant_path:",
+                "    ", processed_quant$quant_path,
+                "  - pass force=True to overwrite it\n")
+            return(processed_quant)
+        }
+    }
+    
+    # if we are here, untar it
+    utils::untar(tarfile = tar_file,
+                 exdir = quant_parent_dir
+    )
+    processed_quant$quant_path <- list.dirs(quant_parent_dir,
+                                                  full.names = TRUE,
+                                                  recursive = FALSE)
+    
+    return(processed_quant)
+}
+
+load_quant <- function(processed_quant,
+                       output_format="scRNA",
+                       nonzero = FALSE,
+                       quiet = FALSE) {
+    check_validity(processed_quant)
+    
+    if (!file.exists(processed_quant$quant_path)) {
+        stop("quant_path field is invalid, ",
+             "run processed_quant= dec",
+             "ompress_tar(processed_quant)",
+             "to prepare it.")
+    }
+
+    .say(quiet, 
+         "Decompressing the quant result of dataset #",
+         processed_quant$dataset_id,
+         " from: ",
+         processed_quant$quant_path
+    )
+    processed_quant$sce <- fishpond::loadFry(fryDir = processed_quant$quant_path,
+                      outputFormat = output_format,
+                      nonzero = nonzero,
+                      quiet = quiet)
+    
+    return(processed_quant)
+}
+
+FDL <- function(dataset_id,
+                tar_dir="quant_tar",
+                tar_file_name=NULL,
+                quant_dir="processed_quant",
+                quant_path_name=NULL,
+                output_format="scRNA",
+                nonzero=FALSE,
+                force=FALSE, 
+                quiet=FALSE) {
+
+    # init processed_quant
+    processed_quant = init_processed_quant(dataset_id)
+    
+    # fetch it
+    processed_quant = fetch_tar(processed_quant,
+                              tar_dir=tar_dir,
+                              file_name=tar_file_name,
+                              force=force,
+                              quiet=quiet)
+    
+    # decompress it
+    processed_quant = decompress_tar(processed_quant,
+                                   quant_dir=quant_dir,
+                                   quant_path_name=quant_path_name,
+                                   force=force,
+                                   quiet=quiet)
+    
+    # load it
+    processed_quant = load_quant(processed_quant,
+                               output_format=output_format,
+                               nonzero = nonzero,
+                               quiet = quiet)
+    
+    return(processed_quant)
+}
+
+check_validity <- function(processed_quant) {
     if (any(c(
-        is.null(dataset_info_list[["dataset_id"]]),
-        is.null(dataset_info_list[["chemistry"]]),
-        is.null(dataset_info_list[["reference"]]),
-        is.null(dataset_info_list[["dataset_name"]]),
-        is.null(dataset_info_list[["link"]]),
-        is.null(dataset_info_list[["data_url"]]),
-        is.null(dataset_info_list[["MD5"]]),
-        is.null(dataset_info_list[["feature_barcode"]]),
-        is.null(dataset_info_list[["library_csv"]]),
-        is.null(dataset_info_list[["quant_link"]])
+        is.null(processed_quant$dataset_id),
+        is.null(processed_quant$chemistry),
+        is.null(processed_quant$reference),
+        is.null(processed_quant$dataset_name),
+        is.null(processed_quant$link),
+        is.null(processed_quant$data_url),
+        is.null(processed_quant$MD5),
+        is.null(processed_quant$feature_barcode),
+        is.null(processed_quant$library_csv),
+        is.null(processed_quant$quant_link)
     ))) {
         stop(paste0("Invalid dataset info list, use init_",
-                    "dataset_info_list(dataset_id) to ",
+                    "processed_quant(dataset_id) to ",
                     "initiate a valid one.")
             )
     } else {
-        dataset_id = dataset_info_list[["dataset_id"]]
+        dataset_id = processed_quant$dataset_id
         if ((is.numeric(dataset_id))) {
             if (!((dataset_id >= 1) &
                     (dataset_id <= nrow(available_datasets)))) {
                         stop(paste0("Invalid dataset info list, use init_",
-                                    "dataset_info_list(dataset_id) to ",
+                                    "processed_quant(dataset_id) to ",
                                     "initiate a valid one.")
                                     )
             }
         } else {
             stop(paste0("Invalid dataset info list, use init_",
-                        "dataset_info_list(dataset_id) to ",
+                        "processed_quant(dataset_id) to ",
                         "initiate a valid one.")
                         )
         }

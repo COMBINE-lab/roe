@@ -92,6 +92,13 @@ load_processed_quant <- function(dataset_ids = c(),
         return (available_datasets)
     }
 
+    dataset_ids = check_dataset_ids(dataset_ids)
+    # check whether there is any dataset id left
+    if (length(dataset_ids) == 0) {
+        stop("No valid dataset id found, can not proceed")
+    }
+    
+    # check output_format
     if (is.list(output_format)) {
         # if a list is given,
         # it should be either one customized format
@@ -129,38 +136,45 @@ load_processed_quant <- function(dataset_ids = c(),
         nonzero <- as.list(rep(nonzero, nd))
         names(nonzero) <- dataset_ids
     }
-
-    .say(quiet, "Fetching datasets")
-
-    # download the datsets
-    dataset_list <- fetch_processed_quant(dataset_ids = dataset_ids,
-                                            fetch_dir = fetch_dir,
-                                            force = force,
-                                            keep_tar =  keep_tar,
-                                            quiet = quiet
-                                            )
-
-    processed_dataset_list <- list()
+    
+    pq_list <- list()
+    # folder for (temporarily) storing tar files.
+    tar_dir <- file.path(fetch_dir, "datasets_tar")
+    dir.create(tar_dir, recursive = TRUE,
+               showWarnings = FALSE)
+    
     # process them using user output
     for (dataset_id in dataset_ids) {
-        dataset_id <- as.character(dataset_id)
-        .say(quiet, "Loading dataset ", dataset_id)
-        quant_dir_ds <- dataset_list[[dataset_id]][["quant_dir"]]
+        
         output_format_ds <- output_format[[dataset_id]]
         nonzero_ds <- nonzero[[dataset_id]]
 
-        processed_dataset = .get_dataset_info_list(available_datasets,
-                                                    dataset_id)
-        processed_dataset[["quant_dir"]] <- quant_dir_ds
-        processed_dataset[["sce"]] <-
-                            fishpond::loadFry(fryDir = quant_dir_ds,
-                                                outputFormat = output_format_ds,
-                                                nonzero = nonzero_ds,
-                                                quiet = quiet
-                        )
-        processed_dataset_list[[dataset_id]] <- processed_dataset
-    }
+        processed_dataset = FDL(dataset_id,
+                                tar_dir=tar_dir,
+                                quant_dir=fetch_dir,
+                                output_format=output_format_ds,
+                                nonzero=nonzero_ds,
+                                force=force, 
+                                quiet=quiet)
 
-    # output
-    processed_dataset_list
+        
+        
+        # reset tar_path if needed
+        if (!keep_tar) {
+            processed_quant$tar_path = NULL
+        }
+        
+        # append to list
+        pq_list[[as.character(dataset_id)]] = processed_quant
+    }
+    
+    if (!keep_tar) {
+        .say(quiet,
+             "Removing downloaded tar files in directory:\n",
+             "  ", tar_dir)
+        unlink(tar_dir,  recursive = TRUE, force = TRUE)
+    }
+    
+    .say(quiet, "Done")
+    return(pq_list)
 }
