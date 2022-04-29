@@ -1,14 +1,16 @@
 #' Fetch preprocessed quantification result.
 #'
-#' Fetch alevin-fry processed quantification result of publicly available datasets.
+#' Fetch alevin-fry processed quantification 
+#' result of publicly available datasets.
 #'
-#' @param dataset_ids integer scalar or vector providing the id of the
-#' available dataset(s) to be fetched.
-#' @param fetch_dir path to the directory where the fetched quantification results
-#' will be stored. It will be created if not exists.
+#' @param dataset_ids integer scalar or vector providing
+#' the id of the available dataset(s) to be fetched.
+#' @param fetch_dir path to the directory where the fetched
+#' quantification results will be stored. It will be created if not exists.
 #' @param force logical whether to force re-fetching the existing datasets.
 #' @param keep_tar logical whether to keep the compressed datasets after
-#' decompressing. If TRUE, the tar files will be stored in a folder called
+#' decompressing. Default is FALSE. If TRUE, the tar files
+#'  will be stored in a folder called
 #' datasets_tar under the \code{fetch_dir}.
 #' @param quiet logical whether to display no messages.
 #'
@@ -27,10 +29,10 @@
 #' \href{https://www.10xgenomics.com/resources/datasets}{their website}
 #' for download.
 #' 
-#' We have created a \href{https://www.nextflow.io}{Nextflow}-based \code{alevin-fry}
-#' workflow that one can use to easily quantify single-cell RNA-sequencing
-#' data in a single workflow.  The pipeline can be found
-#' \href{https://github.com/COMBINE-lab/10x-requant}{here}.
+#' We have created a \href{https://www.nextflow.io}{Nextflow}-based 
+#' \code{alevin-fry} workflow that one can use to easily quantify
+#' single-cell RNA-sequencing data in a single workflow.  The 
+#' pipeline can be found \href{https://github.com/COMBINE-lab/10x-requant}{here}.
 #' To test out this initial pipeline, we have begun to reprocess the
 #' publicly-available datasets collected from the 10x website. We have
 #' focused the initial effort on standard single-cell and single-nucleus
@@ -120,7 +122,7 @@
 fetch_processed_quant <- function(dataset_ids = c(),
                                     fetch_dir = "processed_quant",
                                     force = FALSE,
-                                    keep_tar = TRUE,
+                                    keep_tar = FALSE,
                                     quiet = FALSE
                                 ) {
 

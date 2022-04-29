@@ -2,16 +2,18 @@
 #'
 #' Fetch and load preprocessed 10x datasets as SingleCellExperiment objects.
 #' @param dataset_ids integer scalar or vector providing the id of the
-#' dataset(s) to be Fetched and processed. See \code{\link{fetch_processed_quant}}
+#' dataset(s) to be Fetched and processed. See 
+#' \code{\link{fetch_processed_quant}}
 #' for details.
 #' @param fetch_dir path to the folder where the fetched quantification results
 #' should be stored.
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' See \code{\link{fetch_processed_quant}} for details.
-#' @param keep_tar logical whether to delete the intermediate
-#' compressed datasets. The default is TRUE 
-#' See \code{\link{fetch_processed_quant}} for details.
+#' @param keep_tar logical whether to keep the compressed datasets after
+#' decompressing. Default is FALSE. If TRUE, the tar files
+#'  will be stored in a folder called
+#' datasets_tar under the \code{fetch_dir}.
 #' @param output_format can be \emph{either} a valid
 #' \code{\link[fishpond]{loadFry}} \code{outputFormat}
 #' or a list of it. The \code{names} of the list must
