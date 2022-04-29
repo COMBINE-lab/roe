@@ -243,7 +243,7 @@ check_validity <- function(processed_quant) {
         is.null(processed_quant$library_csv),
         is.null(processed_quant$quant_link)
     ))) {
-        stop(paste0("Invalid dataset info list, use init_",
+        stop(paste0("Invalid processed_quant, use init_",
                     "processed_quant(dataset_id) to ",
                     "initiate a valid one.")
             )
