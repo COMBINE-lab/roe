@@ -100,6 +100,7 @@ fetch_tar <- function(processed_quant,
         "  - Fetched quant tar is saved as:\n",
         "    ", processed_quant$tar_path
         )
+    return(processed_quant)
 }
 
 decompress_tar <- function(processed_quant,
@@ -166,6 +167,11 @@ decompress_tar <- function(processed_quant,
                                                   full.names = TRUE,
                                                   recursive = FALSE)
     
+        
+    say(quiet, 
+        "  - Decompressed quant result is saved as:\n",
+        "    ", processed_quant$quant_path
+        )
     return(processed_quant)
 }
 
@@ -183,9 +189,9 @@ load_quant <- function(processed_quant,
     }
 
     .say(quiet, 
-         "Decompressing the quant result of dataset #",
+         "Loading dataset #",
          processed_quant$dataset_id,
-         " from: ",
+         " from:\n  ",
          processed_quant$quant_path
     )
     processed_quant$sce <- fishpond::loadFry(fryDir = processed_quant$quant_path,
