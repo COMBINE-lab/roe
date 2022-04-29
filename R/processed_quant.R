@@ -78,18 +78,21 @@ fetch_tar <- function(processed_quant,
                         quiet=FALSE) {
     # check validity of processed_quant
     check_validity(processed_quant)
-    .say(quiet, 
-         "Fetching the quant result of dataset #",
-         processed_quant$dataset_id
+    .say(quiet,
+        "Fetching the quant result of dataset #",
+        processed_quant$dataset_id
         )
 
     # if tar_path is not null, return unless force=TRUE
-    if (file.exists(processed_quant$tar_path)) {
-        .say(quiet,
-             "  - The processed_quant$tar_path exists:\n",
-             "    ", processed_quant$tar_path, "\n",
-             "  - Pass force=True to update it\n")
-        return(processed_quant)
+    if (!is.null(processed_quant$tar_path)) {
+        if (file.exists(processed_quant$tar_path)) {
+            .say(quiet,
+                "  - The processed_quant$tar_path is not ",
+                "NULL and the path exists:\n",
+                "    ", processed_quant$tar_path, "\n",
+                "  - Pass force=True to update it")
+            return(processed_quant)
+        }
     }
 
     dir.create(tar_dir, recursive = TRUE,
@@ -99,20 +102,20 @@ fetch_tar <- function(processed_quant,
         file_name <- paste0(processed_quant$dataset_id, ".tar")
     } else if (!endsWith(file_name, ".tar")) {
         file_name <- paste0(file_name, ".tar")
-    }    
-    
+    }
+
     tar_file <- file.path(tar_dir, file_name)
 
     if (file.exists(tar_file)) {
         if (force) {
             .say(quiet,
-                 "  - Overwriting the existing tar file:\n",
-                 "    ", tar_file, "\n")
+                "  - Overwriting the existing tar file:\n",
+                "    ", tar_file, "\n")
         } else {
             .say(quiet,
-                 "  - Use the existing file as tar_path:\n",
-                 "    ", tar_file, "\n",
-                 "  - Pass force=True to overwrite it\n")
+                "  - Use the existing file as tar_path:\n",
+                "    ", tar_file, "\n",
+                "  - Pass force=True to overwrite it")
             processed_quant$tar_path = tar_file
             return(processed_quant)
         }
@@ -124,25 +127,25 @@ fetch_tar <- function(processed_quant,
                         quiet = TRUE,
                         cacheOK = FALSE
                         )
-    processed_quant$tar_path = tar_file
-    
-    say(quiet, 
+    processed_quant$tar_path <- tar_file
+
+    .say(quiet,
         "  - Fetched quant tar is saved as:\n",
         "    ", processed_quant$tar_path
         )
     return(processed_quant)
 }
 
-#' decompress the fetched quantification result of a 
-#' specific dataset and record the path 
+#' decompress the fetched quantification result of a
+#' specific dataset and record the path
 #' as the quant_path field of the returned processed_quant list
 #' This function must be run after \code{fetch_tar()}
 #' 
-#' @param processed_quant a list recording the details of 
+#' @param processed_quant a list recording the details of
 #' a dataset. Initialized by \code{init_processed_quant(dataset_id)}
 #' @param quant_dir a string to a path where the fetched tar files will
 #' be stored. It will be created if does not exist.
-#' @param quant_path_name a string indicates the name of the directory 
+#' @param quant_path_name a string indicates the name of the directory
 #' that will be used for storing the quantification result. If NULL,
 #' the dataset_id will be used as the file name.
 #' @param force logic whether to proceed if the tar file exists.
@@ -150,126 +153,142 @@ fetch_tar <- function(processed_quant,
 #' @export
 
 decompress_tar <- function(processed_quant,
-                           quant_dir="processed_quant",
-                           quant_path_name=None,
-                           force=FALSE,
-                           quiet=FALSE) {
+                            quant_dir="processed_quant",
+                            quant_path_name=NULL,
+                            force=FALSE,
+                            quiet=FALSE) {
     check_validity(processed_quant)
-    
+
     if (is.null(processed_quant$tar_path)) {
         stop("tar_path field is NULL, ",
-             "run processed_quant = fetch_tar(processed_quant) ",
-             "to fetch the tar file.")
+            "run processed_quant = fetch_tar(processed_quant) ",
+            "to fetch the tar file.")
     }
-    
-    .say(quiet, 
-         "Decompressing the quant result of dataset #",
-         processed_quant$dataset_id, "using: \n",
-         "  ", processed_quant$tar_path
-         
+
+    .say(quiet,
+        "Decompressing the quant result of dataset #",
+        processed_quant$dataset_id, "using: \n",
+        "  ", processed_quant$tar_path
     )
-    
+
     # if quant_path is not null, return unless force=TRUE
-    if (file.exists(processed_quant$quant_path)) {
-        .say(quiet,
-             "  - Use the existing directory as quant_path:\n",
-             "    ", processed_quant$quant_path, "\n",
-             "  - Pass force=True to update it\n")
-        return(processed_quant)
+    if (!is.null(processed_quant$quant_path)) {
+        if (file.exists(processed_quant$quant_path)) {
+            .say(quiet,
+                "  - Use the existing directory as quant_path:\n",
+                "    ", processed_quant$quant_path, "\n",
+                "  - Pass force=True to update it")
+            return(processed_quant)
+        }
     }
-    
+
     # check quant_path_name
     if (is.null(quant_path_name)) {
-        quant_path_name = paste0(processed_quant$dataset_id)
+        quant_path_name <- paste0(processed_quant$dataset_id)
     }
-    
+
     # specify paths
-    quant_parent_dir <- file.path(fetch_dir, quant_path_name)
+    quant_parent_dir <- file.path(quant_dir, quant_path_name)
 
     # check quant_parent_dir
     if (file.exists(quant_parent_dir)) {
         if (force) {
             .say(quiet,
-                 "  - Removing existing quant folder:\n",
-                 "    ", quant_parent_dir)
+                "  - Removing existing quant folder:\n",
+                "    ", quant_parent_dir)
             unlink(quant_parent_dir, recursive = TRUE, force = TRUE)
         } else {
             processed_quant$quant_path <- list.dirs(quant_parent_dir,
-                                                           full.names = TRUE,
-                                                           recursive = FALSE)
-            say(quiet, 
+                                                    full.names = TRUE,
+                                                    recursive = FALSE)
+            .say(quiet,
                 "  - Use the existing directory as quant_path:",
                 "    ", processed_quant$quant_path,
-                "  - pass force=True to overwrite it\n")
+                "  - pass force=True to overwrite it")
             return(processed_quant)
         }
     }
-    
+
     # if we are here, untar it
-    utils::untar(tarfile = tar_file,
-                 exdir = quant_parent_dir
+    utils::untar(tarfile = processed_quant$tar_path,
+                exdir = quant_parent_dir
     )
     processed_quant$quant_path <- list.dirs(quant_parent_dir,
-                                                  full.names = TRUE,
-                                                  recursive = FALSE)
-    
-        
-    say(quiet, 
+                                            full.names = TRUE,
+                                            recursive = FALSE)
+
+
+    .say(quiet,
         "  - Decompressed quant result is saved as:\n",
         "    ", processed_quant$quant_path
         )
     return(processed_quant)
 }
 
-#' load the fetched quantification result of a 
+#' load the fetched quantification result of a
 #' specific dataset as a SingleCellExperiment object
 #' and store it in the sce field of the returned
 #'  processed_quant list.
 #' This function must be run after \code{decompress_tar()}
 #' 
-#' @param processed_quant a list recording the details of 
+#' @param processed_quant a list recording the details of
 #' a dataset. 
-#' @param output_format the format of the returned SingleCellExperiement
+#' @param output_format the format of the returned SingleCellExperiment
 #' object. It will be passed to \code{\link[fishpond]{loadFry}}
-#' as the \code{outputFormat} parameter. 
+#' as the \code{outputFormat} parameter.
 #' @param nonzero It will be passed to \code{\link[fishpond]{loadFry}}
-#' as the \code{nonzero} parameter. 
+#' as the \code{nonzero} parameter.
 #' @param quiet logical whether to display no messages
 #' @export
 
 load_quant <- function(processed_quant,
-                       output_format="scRNA",
-                       nonzero = FALSE,
-                       quiet = FALSE) {
+                        output_format="scRNA",
+                        nonzero = FALSE,
+                        quiet = FALSE) {
     check_validity(processed_quant)
-    
-    if (!file.exists(processed_quant$quant_path)) {
+
+    if (is.null(processed_quant$quant_path)) {
         stop("quant_path field is invalid, ",
-             "run processed_quant= dec",
-             "ompress_tar(processed_quant)",
-             "to prepare it.")
+            "run processed_quant= dec",
+            "ompress_tar(processed_quant)",
+            "to prepare it.")
     }
 
-    .say(quiet, 
-         "Loading dataset #",
-         processed_quant$dataset_id,
-         " from:\n  ",
-         processed_quant$quant_path
+    if (!file.exists(processed_quant$quant_path)) {
+        stop("quant_path field is invalid, ",
+            "run processed_quant= dec",
+            "ompress_tar(processed_quant)",
+            "to prepare it.")
+    }
+
+    if ((!is.null(processed_quant$sce)) & (!force)) {
+        .say(quiet,
+            "  - The sce field of the passed processed_",
+            "quant list is not NULL\n",
+            "  - Pass force=True to update it\n")
+        return(processed_quant)
+    }
+
+    .say(quiet,
+        "Loading dataset #",
+        processed_quant$dataset_id,
+        " from:\n  ",
+        processed_quant$quant_path
     )
     processed_quant$sce <- fishpond::loadFry(fryDir = processed_quant$quant_path,
-                      outputFormat = output_format,
-                      nonzero = nonzero,
-                      quiet = quiet)
-    
+                                            outputFormat = output_format,
+                                            nonzero = nonzero,
+                                            quiet = quiet)
+
     return(processed_quant)
 }
 
-#' fetch, decompress and load the quantification result of a 
+#' fetch, decompress and load the quantification result of a
 #' specific dataset as a SingleCellExperiment object
 #' and store it in the sce field of the returned
 #' processed_quant list.
 #' 
-#' @param dataset_id the id of an available dataset. 
+#' @param dataset_id the id of an available dataset.
 #' Run \code{print_available_datasets()} for all available
 #' datasets.
 #' @param tar_dir a string to a path where the fetched tar files will
@@ -278,14 +297,15 @@ load_quant <- function(processed_quant,
 #' the dataset_id will be used as the file name.
 #' @param quant_dir a string to a path where the fetched tar files will
 #' be stored. It will be created if does not exist.
-#' @param quant_path_name a string indicates the name of the directory 
+#' @param quant_path_name a string indicates the name of the directory
 #' that will be used for storing the quantification result. If NULL,
 #' the dataset_id will be used as the file name.
 #' @param output_format the format of the returned SingleCellExperiement
 #' object. It will be passed to \code{\link[fishpond]{loadFry}}
-#' as the \code{outputFormat} parameter. 
+#' as the \code{outputFormat} parameter.
+#' @param force logic whether to proceed if the files exist.
 #' @param nonzero It will be passed to \code{\link[fishpond]{loadFry}}
-#' as the \code{nonzero} parameter. 
+#' as the \code{nonzero} parameter.
 #' @param quiet logical whether to display no messages
 #' @export
 #' 
@@ -296,32 +316,32 @@ FDL <- function(dataset_id,
                 quant_path_name=NULL,
                 output_format="scRNA",
                 nonzero=FALSE,
-                force=FALSE, 
+                force=FALSE,
                 quiet=FALSE) {
 
     # init processed_quant
     processed_quant = init_processed_quant(dataset_id)
-    
+
     # fetch it
     processed_quant = fetch_tar(processed_quant,
-                              tar_dir=tar_dir,
-                              file_name=tar_file_name,
-                              force=force,
-                              quiet=quiet)
-    
+                                tar_dir = tar_dir,
+                                file_name = tar_file_name,
+                                force = force,
+                                quiet = quiet)
+
     # decompress it
     processed_quant = decompress_tar(processed_quant,
-                                   quant_dir=quant_dir,
-                                   quant_path_name=quant_path_name,
-                                   force=force,
-                                   quiet=quiet)
-    
+                                    quant_dir = quant_dir,
+                                    quant_path_name = quant_path_name,
+                                    force = force,
+                                    quiet = quiet)
+
     # load it
     processed_quant = load_quant(processed_quant,
-                               output_format=output_format,
-                               nonzero = nonzero,
-                               quiet = quiet)
-    
+                                output_format = output_format,
+                                nonzero = nonzero,
+                                quiet = quiet)
+
     return(processed_quant)
 }
 

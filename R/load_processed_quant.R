@@ -111,7 +111,8 @@ load_processed_quant <- function(dataset_ids = c(),
         }
         # otherwise, each dataset should get a format, so check the length
         if (length(output_format) != nd) {
-            stop("The providing output_format list has different length with dataset_ids, cannot proceed")
+            stop("The providing output_format list ",
+                "has different length with dataset_ids, cannot proceed")
         }
     } else if (is.character(output_format)) {
         # if a str is given, it should be a pre-defined format
@@ -119,7 +120,8 @@ load_processed_quant <- function(dataset_ids = c(),
         output_format <- as.list(rep(output_format, nd))
         names(output_format) <- dataset_ids
     } else {
-        stop("The providing output_format list has different length with dataset_ids, cannot proceed")
+        stop("The providing output_format list ",
+            "has different length with dataset_ids, cannot proceed")
     }
 
     # then we do the same thing for nonzero
@@ -127,7 +129,8 @@ load_processed_quant <- function(dataset_ids = c(),
         # user defines a nonzero for each dataset
         # check whether length matches
         if (length(nonzero) != nd) {
-            stop("The providing nonzero list has different length with dataset_ids, cannot proceed")
+            stop("The providing nonzero list has ",
+            "different length with dataset_ids, cannot proceed")
         }
     } else {
         # The last valid situation is that the
@@ -136,45 +139,42 @@ load_processed_quant <- function(dataset_ids = c(),
         nonzero <- as.list(rep(nonzero, nd))
         names(nonzero) <- dataset_ids
     }
-    
+
     pq_list <- list()
     # folder for (temporarily) storing tar files.
     tar_dir <- file.path(fetch_dir, "datasets_tar")
     dir.create(tar_dir, recursive = TRUE,
-               showWarnings = FALSE)
-    
+                showWarnings = FALSE)
+
     # process them using user output
     for (dataset_id in dataset_ids) {
-        
         output_format_ds <- output_format[[dataset_id]]
         nonzero_ds <- nonzero[[dataset_id]]
 
-        processed_dataset = FDL(dataset_id,
-                                tar_dir=tar_dir,
-                                quant_dir=fetch_dir,
-                                output_format=output_format_ds,
-                                nonzero=nonzero_ds,
-                                force=force, 
-                                quiet=quiet)
+        processed_dataset <- FDL(dataset_id,
+                                tar_dir = tar_dir,
+                                quant_dir = fetch_dir,
+                                output_format = output_format_ds,
+                                nonzero = nonzero_ds,
+                                force = force, 
+                                quiet = quiet)
 
-        
-        
         # reset tar_path if needed
         if (!keep_tar) {
-            processed_quant$tar_path = NULL
+            processed_quant$tar_path <- NULL
         }
-        
+
         # append to list
-        pq_list[[as.character(dataset_id)]] = processed_quant
+        pq_list[[as.character(dataset_id)]] <- processed_quant
     }
-    
+
     if (!keep_tar) {
         .say(quiet,
-             "Removing downloaded tar files in directory:\n",
-             "  ", tar_dir)
+            "Removing downloaded tar files in directory:\n",
+            "  ", tar_dir)
         unlink(tar_dir,  recursive = TRUE, force = TRUE)
     }
-    
+
     .say(quiet, "Done")
     return(pq_list)
 }

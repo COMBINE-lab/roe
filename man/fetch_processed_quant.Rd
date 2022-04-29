@@ -2,7 +2,7 @@
 % Please edit documentation in R/fetch_processed_quant.R
 \name{fetch_processed_quant}
 \alias{fetch_processed_quant}
-\title{Fetch preprocessed 10x datasets}
+\title{Fetch preprocessed quantification result.}
 \usage{
 fetch_processed_quant(
   dataset_ids = c(),
@@ -14,44 +14,65 @@ fetch_processed_quant(
 }
 \arguments{
 \item{dataset_ids}{integer scalar or vector providing the id of the
-dataset(s) to be downloaded and processed. If a scalar is given, the
-returned object will be a SingleCellExperiment object; If a vector
-is given, the returned object will be a list of SingleCellExperiment
-objects, each for a queried dataset.}
+available dataset(s) to be fetched.}
 
-\item{fetch_dir}{path to the folder where the fetched quantification results
-should be stored. It will create if not exists.}
+\item{fetch_dir}{path to the directory where the fetched quantification results
+will be stored. It will be created if not exists.}
 
-\item{force}{logical whether to force re-downloading the existing datasets.}
+\item{force}{logical whether to force re-fetching the existing datasets.}
 
-\item{keep_tar}{logical whether to delete the compressed datasets.
-If FALSE, the tar files will be stored in a folder called datasets_tar
-under the \code{fetch_dir}.}
+\item{keep_tar}{logical whether to keep the compressed datasets after
+decompressing. If TRUE, the tar files will be stored in a folder called
+datasets_tar under the \code{fetch_dir}.}
 
 \item{quiet}{logical whether to display no messages.}
 }
 \value{
 If an empty dataset_ids is provided,
-a data frame containing the information of available datasets will be returned;
-otherwise, a list of lists, in which each list stores the information of one 
-fetched dataset. The `quant_dir` field represetn the path to the quantification
+a data frame containing the information of
+available datasets will be returned;
+otherwise, a list of lists, in which
+each list stores the information of one
+fetched dataset. The `quant_dir` field
+represents the path to the quantification
 result of the fetched dataset.
 }
 \description{
-Construct the splici transcriptome for alevin-fry.
+Fetch alevin-fry processed quantification result of publicly available datasets.
 }
 \details{
-10x Genomics provided various publicly available datasets on
-their website for free downloading
-(\url{https://www.10xgenomics.com/resources/datasets}).
-To stop re-inventing the wheel, we downloaded and processed
-these datasets using a Nextflow-based alevin-fry workflow
-(\url{https://github.com/COMBINE-lab/10x-requant}) and
-provide the link to the quantification results in the above
-GitHub repository. Using this function, one can directly access
-the quantification results of the preprocessed 10x datasets
-and load these results into R as a SingleCellExperiment object.
-Currently, the datasets that are available for querying include:
+The raw data for many single-cell and single-nucleus RNA-seq
+experiments is publicly available. However, certain datasets
+are used again and again, to demonstrate data processing in
+tutorials, as benchmark datasets for novel methods (e.g. for
+clustering, dimensionality reduction, cell type identification
+, etc.). In particular, 10x Genomics hosts various publicly
+available datasets generated using their technology and
+processed via their Cell Ranger software on
+\href{https://www.10xgenomics.com/resources/datasets}{their website}
+for download.
+
+We have created a \href{https://www.nextflow.io}{Nextflow}-based \code{alevin-fry}
+workflow that one can use to easily quantify single-cell RNA-sequencing
+data in a single workflow.  The pipeline can be found
+\href{https://github.com/COMBINE-lab/10x-requant}{here}.
+To test out this initial pipeline, we have begun to reprocess the
+publicly-available datasets collected from the 10x website. We have
+focused the initial effort on standard single-cell and single-nucleus
+gene-expression data generated using the Chromium v2 and v3 chemistries,
+but hope to expand the pipeline to more complex protocols soon
+(e.g. feature barcoding experiments) and process those data as well.
+We note that these more complex protocols can already be processed with
+\code{alevin-fry} (see the
+\href{https://combine-lab.github.io/alevin-fry-tutorials}{alevin-fry tutorials}),
+but these have just not yet been incorporated into the
+automated Nextflow-based workflow linked above.
+
+Following we list the name, link and dataset id of the currently
+available datasets whose quantification result is ready for fetch.
+To obtain the details of these available datasets as a data frame,
+simply run `fetch_processed_quant()` in R.
+
 \enumerate{
 \item \href{https://www.10xgenomics.com/resources/datasets/500-human-pbm-cs-3-lt-v-3-1-chromium-controller-3-1-low-6-1-0}{500 Human PBMCs, 3' LT v3.1, Chromium Controller}
 \item \href{https://www.10xgenomics.com/resources/datasets/500-human-pbm-cs-3-lt-v-3-1-chromium-x-3-1-low-6-1-0}{500 Human PBMCs, 3' LT v3.1, Chromium X}
@@ -89,13 +110,9 @@ Currently, the datasets that are available for querying include:
 \item \href{https://www.10xgenomics.com/resources/datasets/1-k-brain-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Brain Cells from an E18 Mouse (v2 chemistry)}
 \item \href{https://www.10xgenomics.com/resources/datasets/1-k-heart-cells-from-an-e-18-mouse-v-2-chemistry-3-standard-3-0-0}{1k Heart Cells from an E18 mouse (v2 chemistry)}
 }
-To obtain these information as a data frame, one can simply run
-`fetch_processed_quant()` in R.
+
 Note that because the name of datasets are too long, the stored
-datasets are named by the MD5 hash value of their fastqs.tar file.
-If one would like to use the downloaded quantification results
-out of this function, please refer to the webpage of the
-corresponding datasets to find the MD5 hash value.
+datasets are named by their id.
 }
 \examples{
 
@@ -103,12 +120,14 @@ corresponding datasets to find the MD5 hash value.
 library(roe)
 # run the function
 available_datasets = load_processed_quant()
-fetch_processed_quant(dataset_id = c(1, 2),
-                       fetch_dir = "processed_quant",
-                       force = FALSE,
-                       keep_tar = TRUE,
-                       quiet = FALSE
-)
+fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 2),
+                                              fetch_dir = "processed_quant",
+                                              force = FALSE,
+                                              keep_tar = TRUE,
+                                              quiet = FALSE)
+
+fetched_quant_list[["1"]][["quant_dir"]]
+fetched_quant_list[["2"]][["quant_dir"]]
 }
 
 }
