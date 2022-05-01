@@ -26,6 +26,7 @@ Imports:
     stringr,
     utils,
     fishpond,
+    SingleCellExperiment,
     methods
 RoxygenNote: 7.1.2
 Suggests: 

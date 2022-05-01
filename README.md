@@ -78,8 +78,8 @@ We have created a [Nextflow](https://www.nextflow.io)-based `alevin-fry` workflo
 Here in the `roe` pacakge, we prepared many useful functions for interacting with the preprocessed quantification results of publicly available datasets.
 - `print_available_datasets()` prints out the id of the available datasets.
 - `get_available_dataset_df()` returns the details of the available datasets as a dataframe.
-- `init_processed_quant(dataset_id)` initiate and return the _processed quant list_ of an available dataset. This list will be used for helping fetching and loading the quantification results of the available datasets. The parameter `dataset_id` is the id of one of the available datasets.
-- `fetch_quant(processed_quant)` fetchs the quantification result of a dataset according to the _processed quant list_ returned by `init_processed_quant()`.
+- `ProcessedQuant(dataset_id)` initiate and return the _processed quant list_ of an available dataset. This list will be used for helping fetching and loading the quantification results of the available datasets. The parameter `dataset_id` is the id of one of the available datasets.
+- `fetch_quant(processed_quant)` fetchs the quantification· result of a dataset according to the _processed quant list_ returned by `ProcessedQuant()`.
 - `decompress_quant(processed_quant)` decompresses the fetched quantification result of a dataset using the _processed quant list_ returned by `fetch_quant()`.
 - `load_quant(processed_quant)` loads the decompressed quantification result of a dataset into R as a [`SingleCellExperiment`](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) object according to the _processed quant list_ returned by `decompress_quant()`.
 - `FDL(dataset_id)` fetches, decompresses and loads the quantification result of 

@@ -151,7 +151,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
 
     for (dataset_id in dataset_ids) {
         # init processed_quant
-        processed_quant <- init_processed_quant(dataset_id)
+        processed_quant <- ProcessedQuant(dataset_id)
 
         # fetch it
         processed_quant <- fetch_quant(processed_quant,
@@ -167,11 +167,11 @@ fetch_processed_quant <- function(dataset_ids = c(),
 
         # reset tar_path if needed
         if (!keep_tar) {
-            processed_quant$tar_path <- NULL
+            processed_quant@tar_path <- character(0)
         }
 
         # append to list
-        pq_list[[as.character(dataset_id)]] = processed_quant
+        pq_list[[as.character(dataset_id)]] <- processed_quant
     }
 
     if (!keep_tar) {

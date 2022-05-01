@@ -8,21 +8,22 @@ fetch_processed_quant(
   dataset_ids = c(),
   fetch_dir = "processed_quant",
   force = FALSE,
-  keep_tar = TRUE,
+  keep_tar = FALSE,
   quiet = FALSE
 )
 }
 \arguments{
-\item{dataset_ids}{integer scalar or vector providing the id of the
-available dataset(s) to be fetched.}
+\item{dataset_ids}{integer scalar or vector providing
+the id of the available dataset(s) to be fetched.}
 
-\item{fetch_dir}{path to the directory where the fetched quantification results
-will be stored. It will be created if not exists.}
+\item{fetch_dir}{path to the directory where the fetched
+quantification results will be stored. It will be created if not exists.}
 
 \item{force}{logical whether to force re-fetching the existing datasets.}
 
 \item{keep_tar}{logical whether to keep the compressed datasets after
-decompressing. If TRUE, the tar files will be stored in a folder called
+decompressing. Default is FALSE. If TRUE, the tar files
+ will be stored in a folder called
 datasets_tar under the \code{fetch_dir}.}
 
 \item{quiet}{logical whether to display no messages.}
@@ -31,14 +32,15 @@ datasets_tar under the \code{fetch_dir}.}
 If an empty dataset_ids is provided,
 a data frame containing the information of
 available datasets will be returned;
-otherwise, a list of lists, in which
-each list stores the information of one
-fetched dataset. The `quant_dir` field
+otherwise, a list of ProcessedQuant class objects, in which
+each ProcessedQuant object stores the information of one
+fetched dataset. The `quant_path` field
 represents the path to the quantification
 result of the fetched dataset.
 }
 \description{
-Fetch alevin-fry processed quantification result of publicly available datasets.
+Fetch alevin-fry processed quantification 
+result of publicly available datasets.
 }
 \details{
 The raw data for many single-cell and single-nucleus RNA-seq
@@ -52,10 +54,10 @@ processed via their Cell Ranger software on
 \href{https://www.10xgenomics.com/resources/datasets}{their website}
 for download.
 
-We have created a \href{https://www.nextflow.io}{Nextflow}-based \code{alevin-fry}
-workflow that one can use to easily quantify single-cell RNA-sequencing
-data in a single workflow.  The pipeline can be found
-\href{https://github.com/COMBINE-lab/10x-requant}{here}.
+We have created a \href{https://www.nextflow.io}{Nextflow}-based 
+\code{alevin-fry} workflow that one can use to easily quantify
+single-cell RNA-sequencing data in a single workflow.  The 
+pipeline can be found \href{https://github.com/COMBINE-lab/10x-requant}{here}.
 To test out this initial pipeline, we have begun to reprocess the
 publicly-available datasets collected from the 10x website. We have
 focused the initial effort on standard single-cell and single-nucleus
@@ -120,14 +122,14 @@ datasets are named by their id.
 library(roe)
 # run the function
 available_datasets = load_processed_quant()
-fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 2),
+fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 3),
                                               fetch_dir = "processed_quant",
                                               force = FALSE,
                                               keep_tar = TRUE,
                                               quiet = FALSE)
 
-fetched_quant_list[["1"]][["quant_dir"]]
-fetched_quant_list[["2"]][["quant_dir"]]
+print(fetched_quant_list$"1"@quant_path)
+print(fetched_quant_list$"2"@quant_path)
 }
 
 }

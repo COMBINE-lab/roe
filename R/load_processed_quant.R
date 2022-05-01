@@ -162,12 +162,12 @@ load_processed_quant <- function(dataset_ids = c(),
                                 quant_dir = fetch_dir,
                                 output_format = output_format_ds,
                                 nonzero = nonzero_ds,
-                                force = force, 
+                                force = force,
                                 quiet = quiet)
 
         # reset tar_path if needed
         if (!keep_tar) {
-            processed_quant$tar_path <- NULL
+            processed_quant@tar_path <- character(0)
         }
 
         # append to list
