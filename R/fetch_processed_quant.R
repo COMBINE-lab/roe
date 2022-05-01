@@ -96,9 +96,9 @@
 #' @return If an empty dataset_ids is provided,
 #' a data frame containing the information of
 #' available datasets will be returned;
-#' otherwise, a list of lists, in which
-#' each list stores the information of one
-#' fetched dataset. The `quant_dir` field
+#' otherwise, a list of ProcessedQuant class objects, in which
+#' each ProcessedQuant object stores the information of one
+#' fetched dataset. The `quant_path` field
 #' represents the path to the quantification
 #' result of the fetched dataset.
 #'
@@ -108,14 +108,14 @@
 #' library(roe)
 #' # run the function
 #' available_datasets = load_processed_quant()
-#' fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 2),
+#' fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 3),
 #'                                               fetch_dir = "processed_quant",
 #'                                               force = FALSE,
 #'                                               keep_tar = TRUE,
 #'                                               quiet = FALSE)
 #' 
-#' fetched_quant_list[["1"]][["quant_dir"]]
-#' fetched_quant_list[["2"]][["quant_dir"]]
+#' print(fetched_quant_list$"1"@quant_path)
+#' print(fetched_quant_list$"2"@quant_path)
 #' }
 #'
 
