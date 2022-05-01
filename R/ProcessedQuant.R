@@ -90,7 +90,7 @@ ProcessedQuant <- function(dataset_id) {
 
 #' fetch the compressed quantification result of a 
 #' specific dataset and stroe the path to the tar file 
-#' in the tar_path field of the returned processed_quant list.
+#' in the tar_path slot of the returned processed_quant list.
 #' This function must be run after \code{init_processed_quant()}
 #' 
 #' @param processed_quant a \code{ProcessedQuant} class object 
@@ -174,7 +174,7 @@ fetch_quant <- function(processed_quant,
 
 #' decompress the fetched quantification result of a
 #' specific dataset and record the path
-#' as the quant_path field of the returned processed_quant list
+#' as the quant_path slot of the returned processed_quant list
 #' This function must be run after \code{fetch_quant()}
 #' 
 #' @param processed_quant a \code{ProcessedQuant} class object 
@@ -198,7 +198,7 @@ decompress_quant <- function(processed_quant,
     check_validity(processed_quant)
     
     if (identical(processed_quant@tar_path, character(0))) {
-        stop("tar_path field is empty, ",
+        stop("tar_path slot is empty, ",
              "run processed_quant = fetch_quant(processed_quant) ",
              "to fetch the tar file.")
     }
@@ -267,8 +267,8 @@ decompress_quant <- function(processed_quant,
 
 #' load the fetched quantification result of a
 #' specific dataset as a SingleCellExperiment object
-#' and store it in the sce field of the returned
-#'  processed_quant list as the sce field.
+#' and store it in the sce slot of the returned
+#'  processed_quant list as the sce slot.
 #' This function must be run after \code{decompress_quant()}
 #' 
 #' @param processed_quant a \code{ProcessedQuant} class object  
@@ -279,7 +279,7 @@ decompress_quant <- function(processed_quant,
 #' as the \code{outputFormat} parameter.
 #' @param nonzero It will be passed to \code{\link[fishpond]{loadFry}}
 #' as the \code{nonzero} parameter.
-#' @param force logic whether to proceed if the sce field exists.
+#' @param force logic whether to proceed if the sce slot exists.
 #' @param quiet logical whether to display no messages. Default is set as FALSE.
 #' @return A ProcessedQuant class object with a updated \code{sce} slot.
 #' 
@@ -293,14 +293,14 @@ load_quant <- function(processed_quant,
     check_validity(processed_quant)
     
     if (identical(processed_quant@quant_path, character(0))) {
-        stop("quant_path field is invalid, ",
+        stop("quant_path slot is invalid, ",
              "run processed_quant= dec",
              "ompress_tar(processed_quant)",
              "to prepare it.")
     }
     
     if (!file.exists(processed_quant@quant_path)) {
-        stop("quant_path field is invalid, ",
+        stop("quant_path slot is invalid, ",
              "run processed_quant= dec",
              "ompress_tar(processed_quant)",
              "to prepare it.")
@@ -308,7 +308,7 @@ load_quant <- function(processed_quant,
     
     if ((sum(dim(processed_quant@sce)) != 0) & (!force)) {
         .say(quiet,
-             "  - The sce field of the passed processed_",
+             "  - The sce slot of the passed processed_",
              "quant list is not empty",
              "  - Pass force=TRUE to update it\n")
         return(processed_quant)
@@ -330,7 +330,7 @@ load_quant <- function(processed_quant,
 
 #' fetch, decompress and load the quantification result of a
 #' specific dataset as a SingleCellExperiment object
-#' and store it in the sce field of the returned
+#' and store it in the sce slot of the returned
 #' processed_quant list.
 #' 
 #' @param dataset_id the id of an available dataset.

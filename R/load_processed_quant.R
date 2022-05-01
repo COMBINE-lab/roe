@@ -46,11 +46,11 @@
 #'
 #' @return If an empty dataset_ids is provided,
 #' a data frame containing the information of available datasets
-#' will be returned; otherwise, a list of lists, where each list
-#' stores the information of one fetched dataset. The `quant_dir`
-#' field represent the path to the quantification result of the 
-#' fetched dataset; The `sce` field represent the SingleCellExperiment
-#' of this dataset.
+#' will be returned; otherwise, a list of ProcessedQuant class object, 
+#' where each list stores the information of one fetched dataset. 
+#' The `quant_path` slot represent the path to the quantification
+#' result of the fetched dataset; The `sce` slot represent the 
+#' SingleCellExperiment of the quantification result of this dataset.
 #'
 #' @examples
 #' 
@@ -59,19 +59,23 @@
 #' # run the function
 #' # The four ways to define output_format
 #' # are the same.
-#' load_processed_quant(dataset_ids = c(1, 2),
+#' load_processed_quant(dataset_ids = c(1, 3),
 #'         fetch_dir = "processed_quant",
 #'         force = FALSE,
 #'         keep_tar = TRUE,
 #'         output_format = "scRNA",
-#' #         output_format = list("scRNA", "scRNA"),
+#' #         output_format = list("1" = scRNA", "3" = "scRNA"),
 #' #         output_format = list("1" = list(counts = c("S", "A")),
-#' #                               "2" = list(counts = c("S", "A"))
+#' #                               "3" = list(counts = c("S", "A"))
 #' #                              ),
 #' #         output_format = list("counts" = c("S", "A")),
 #'         nonzero = FALSE,
 #'         quiet = FALSE
 #' )
+#' 
+#' 
+#' fetched_quant_list$"1"@sce)
+#' fetched_quant_list$"3"@sce)
 #' }
 #' 
 
