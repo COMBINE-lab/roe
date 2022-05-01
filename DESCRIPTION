@@ -25,7 +25,8 @@ Imports:
     S4Vectors,
     stringr,
     utils,
-    fishpond
+    fishpond,
+    methods
 RoxygenNote: 7.1.2
 Suggests: 
     rmarkdown,
