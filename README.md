@@ -94,30 +94,67 @@ print_available_datasets()
 # to download some available datasets to a local directory
 # according to the row index in the available_dataset_df returned 
 # from the previous command
-processed_quant_list = fetch_processed_quant(dataset_ids = c(1,5,7),
+processed_quant_list = fetch_processed_quant(dataset_ids = c(1,3,7),
                                             output_dir = "processed_quant",
                                             force = FALSE,
                                             keep_tar = TRUE,
                                             quiet = FALSE
                     )
+                    
+                    
+# get the ProcessedQuant object for dataset #1 and #3
+pq_ds1 = pq_list[["1"]]
+pq_ds3 = pq_list[["3"]]
+
+# get the name of datset #1 and #3
+pq_ds1@dataset_name
+pq_ds3@dataset_name
+
+
+# get the path to the quantification result of datset #1 and #3
+pq_ds1@quant_link
+pq_ds3@quant_link
+
+# Notice that in the return object of fetch_processed_quant() 
+# the sce slot is empty.
 ```
 
 We also provide a thin wrapper of the `fetch_processed_quant()` and [`fishpond::loadFry`](https://github.com/mikelove/fishpond/blob/master/R/alevin-loadFry.R) so that the fetched datasets can be directly load into R as SingleCellExperiment objects. When using this function, the `outputFormat` parameter can be specified for each fetched dataset separately by providing a list of valid `outputFormat`s, named by the corresponding dataset ids. Similarly, the `nonzero` parameter can also be specified for each dataset by providing a list of valid `nonzero`s, named by the corresponding dataset ids. The following example shows how to define `output_format` in different ways.  
 
 ```R
-load_processed_quant(dataset_ids = c(1, 2),
+load_processed_quant(dataset_ids = c(1, 3),
         fetch_dir = "processed_quant",
         force = FALSE,
         keep_tar = TRUE,
         output_format = "scRNA",
-#         output_format = list("1" = "scRNA", "2" = "scRNA"),
+#         output_format = list("1" = "scRNA", "3" = "scRNA"),
 #         output_format = list("1" = list(counts = c("S", "A")),
-#                               "2" = list(counts = c("S", "A"))
+#                               "3" = list(counts = c("S", "A"))
 #                              ),
 #         output_format = list("counts" = c("S", "A")),
         nonzero = FALSE,
         quiet = FALSE
 )
 }
+
+# get the ProcessedQuant object for dataset #1 and #3
+pq_ds1 = pq_list[["1"]]
+pq_ds3 = pq_list[["3"]]
+
+# get the name of datset #1 and #3
+pq_ds1@dataset_name
+pq_ds3@dataset_name
+
+
+# get the path to the quantification result of datset #1 and #3
+pq_ds1@quant_link
+pq_ds3@quant_link
+
+# get the SingleCellExperiment object
+pq_ds1@sce
+pq_ds3@sce
+
+# Notice that in the return object of fetch_processed_quant() 
+# the sce slot is empty.
 
 ```
