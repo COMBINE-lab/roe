@@ -103,7 +103,7 @@ load_processed_quant <- function(dataset_ids = c(),
     if (length(dataset_ids) == 0) {
         stop("No valid dataset id found, can not proceed")
     }
-    
+
     # check output_format
     if (is.list(output_format)) {
         # if a list is given,
