@@ -8,8 +8,8 @@
 #' @param fetch_dir path to the directory where the fetched
 #' quantification results will be stored. It will be created if not exists.
 #' @param force logical whether to force re-fetching the existing datasets.
-#' @param keep_tar logical whether to keep the compressed datasets after
-#' decompressing. Default is FALSE. If TRUE, the tar files
+#' @param delete_tar logical whether to delete the compressed datasets after
+#' decompressing. If FALSE, the tar files
 #'  will be stored in a folder called
 #' datasets_tar under the \code{fetch_dir}.
 #' @param quiet logical whether to display no messages.
@@ -111,7 +111,7 @@
 #' fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 3),
 #'                                               fetch_dir = "processed_quant",
 #'                                               force = FALSE,
-#'                                               keep_tar = TRUE,
+#'                                               delete_tar = FALSE,
 #'                                               quiet = FALSE)
 #' 
 #' print(fetched_quant_list$"1"@quant_path)
@@ -122,7 +122,7 @@
 fetch_processed_quant <- function(dataset_ids = c(),
                                     fetch_dir = "processed_quant",
                                     force = FALSE,
-                                    keep_tar = FALSE,
+                                    delete_tar = FALSE,
                                     quiet = FALSE
                                 ) {
 
@@ -166,7 +166,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
                                             quiet = quiet)
 
         # reset tar_path if needed
-        if (!keep_tar) {
+        if (delete_tar) {
             processed_quant@tar_path <- character(0)
         }
 
@@ -174,7 +174,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
         pq_list[[as.character(dataset_id)]] <- processed_quant
     }
 
-    if (!keep_tar) {
+    if (delete_tar) {
         .say(quiet,
             "Removing downloaded tar files in directory:\n",
             "  ", tar_dir)

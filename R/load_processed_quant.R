@@ -10,8 +10,8 @@
 #' See \code{\link{fetch_processed_quant}} for details.
 #' @param force logical whether to force re-downloading the existing datasets.
 #' See \code{\link{fetch_processed_quant}} for details.
-#' @param keep_tar logical whether to keep the compressed datasets after
-#' decompressing. Default is FALSE. If TRUE, the tar files
+#' @param delete_tar logical whether to delete the compressed datasets after
+#' decompressing. If FALSE, the tar files
 #'  will be stored in a folder called
 #' datasets_tar under the \code{fetch_dir}.
 #' @param output_format can be \emph{either} a valid
@@ -62,7 +62,7 @@
 #' load_processed_quant(dataset_ids = c(1, 3),
 #'         fetch_dir = "processed_quant",
 #'         force = FALSE,
-#'         keep_tar = TRUE,
+#'         delete_tar = FALSE,
 #'         output_format = "scRNA",
 #' #         output_format = list("1" = scRNA", "3" = "scRNA"),
 #' #         output_format = list("1" = list(counts = c("S", "A")),
@@ -82,7 +82,7 @@
 load_processed_quant <- function(dataset_ids = c(),
                     fetch_dir = "processed_quant",
                     force = FALSE,
-                    keep_tar = TRUE,
+                    delete_tar = FALSE,
                     output_format = "scRNA",
                     nonzero = FALSE,
                     quiet = FALSE
@@ -166,7 +166,7 @@ load_processed_quant <- function(dataset_ids = c(),
                                 quiet = quiet)
 
         # reset tar_path if needed
-        if (!keep_tar) {
+        if (delete_tar) {
             processed_quant@tar_path <- character(0)
         }
 
@@ -174,7 +174,7 @@ load_processed_quant <- function(dataset_ids = c(),
         pq_list[[as.character(dataset_id)]] <- processed_quant
     }
 
-    if (!keep_tar) {
+    if (delete_tar) {
         .say(quiet,
             "Removing downloaded tar files in directory:\n",
             "  ", tar_dir)

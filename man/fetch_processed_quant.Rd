@@ -8,7 +8,7 @@ fetch_processed_quant(
   dataset_ids = c(),
   fetch_dir = "processed_quant",
   force = FALSE,
-  keep_tar = FALSE,
+  delete_tar = FALSE,
   quiet = FALSE
 )
 }
@@ -21,7 +21,7 @@ quantification results will be stored. It will be created if not exists.}
 
 \item{force}{logical whether to force re-fetching the existing datasets.}
 
-\item{keep_tar}{logical whether to keep the compressed datasets after
+\item{delete_tar}{logical whether to keep the compressed datasets after
 decompressing. Default is FALSE. If TRUE, the tar files
  will be stored in a folder called
 datasets_tar under the \code{fetch_dir}.}
@@ -125,7 +125,7 @@ available_datasets = load_processed_quant()
 fetched_quant_list = fetch_processed_quant(dataset_id = c(1, 3),
                                               fetch_dir = "processed_quant",
                                               force = FALSE,
-                                              keep_tar = TRUE,
+                                              delete_tar = FALSE,
                                               quiet = FALSE)
 
 print(fetched_quant_list$"1"@quant_path)
