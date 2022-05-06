@@ -21,8 +21,8 @@ quantification results will be stored. It will be created if not exists.}
 
 \item{force}{logical whether to force re-fetching the existing datasets.}
 
-\item{delete_tar}{logical whether to keep the compressed datasets after
-decompressing. Default is FALSE. If TRUE, the tar files
+\item{delete_tar}{logical whether to delete the compressed datasets after
+decompressing. If FALSE, the tar files
  will be stored in a folder called
 datasets_tar under the \code{fetch_dir}.}
 

@@ -2,12 +2,12 @@
 % Please edit documentation in R/ProcessedQuant.R
 \name{get_available_dataset_df}
 \alias{get_available_dataset_df}
-\title{return the dataframe that contains the details of all 
+\title{return the dataframe that contains the details of all
 available datasets.}
 \usage{
 get_available_dataset_df()
 }
 \description{
-return the dataframe that contains the details of all 
+return the dataframe that contains the details of all
 available datasets.
 }
