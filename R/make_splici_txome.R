@@ -284,7 +284,7 @@ make_splici_txome <- function(genome_path,
 
   # If having duplicated sequences, only keep one
   if (dedup_seqs) {
-    seqs <- dedup_sequences(seqs)
+    seqs <- .dedup_sequences(seqs)
     grl <- grl[names(seqs)]
   }
 
@@ -420,7 +420,7 @@ make_splici_txome <- function(genome_path,
   intron_gr
 }
 
-dedup_sequences <- function(seqs, out_dup) {
+.dedup_sequences <- function(seqs, out_dup) {
   # sort seqs based on names
   # so that unique() will keep the
   # one with the smallest lex order
