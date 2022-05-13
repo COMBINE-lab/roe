@@ -462,8 +462,6 @@ make_splici_txome <- function(genome_path,
             )
   write.table(out_df, file = out_dup, quote = FALSE,
             sep = "\t", row.names = FALSE, col.names = TRUE)
-  write.table(out_df, file = "testfile", quote = FALSE,
-            sep = "\t", row.names = FALSE, col.names = TRUE)
 
   # return unique seqs
   return(unique_seqs)
