@@ -177,7 +177,7 @@ make_splici_txome <- function(genome_path,
   ############################################################################
   # Preprocessing
   ############################################################################
-  
+
   .say(quiet, "- Locating required files...")
   if (!dir.exists(output_dir)) {
     dir.create(file.path(output_dir), recursive = TRUE,
@@ -186,7 +186,7 @@ make_splici_txome <- function(genome_path,
   # make sure flank_length makes sense
   flank_length <- read_length - flank_trim_length
   if (flank_length < 0) {
-    stop("flank trim length must be smaller than read length!")
+    stop("The flank trim length must be smaller than the read length!")
   }
   # make sure gtf file exists
   if (!file.exists(gtf_path)) {
@@ -203,25 +203,28 @@ make_splici_txome <- function(genome_path,
   # out_t2g <- file.path(output_dir, paste0(filename_prefix, "_t2g.tsv"))
   out_t2g3col <- file.path(output_dir, paste0(filename_prefix,
                                               "_t2g_3col.tsv"))
-  .say(quiet, "- Generating spliced transcripts and introns...")
+  out_dup <- file.path(output_dir, "duplicate_entries.tsv")
+  .say(quiet, "- Processing spliced transcripts and introns...")
 
-  .say(quiet, "  - Loading the provided genome and gene annotations")
+  .say(quiet, "  - Loading the input files")
   # load the genome sequence
   x <- Biostrings::readDNAStringSet(file.path(genome_path))
   # get the first word as the name
   names(x) <- stringr::word(names(x), 1)
 
   ############################################################################
-  # Process gtf to get spliced and introns
+  # Process gtf to get spliced transcripts and introns
   ############################################################################
-  suppressWarnings({
-    grl <- getFeatureRanges(
+
+  suppressMessages({
+    suppressWarnings({grl <- eisaR::getFeatureRanges(
       gtf = file.path(gtf_path),
       featureType = c("spliced", "intron"),
       intronType = "separate",
       flankLength = 0,
       joinOverlappingIntrons = TRUE,
-      verbose = FALSE)
+      verbose = FALSE
+    )})
   })
 
   ############################################################################
@@ -242,27 +245,30 @@ make_splici_txome <- function(genome_path,
   intron_gr <- BiocGenerics::unlist(grl[intron_idx])
   # pre-flanking merge
   if (no_flanking_merge) {
-    intron_gr = .add_metadata(intron_gr, x = x)
+    intron_gr <- .add_metadata(intron_gr, x = x)
   }
-  
-  # add flanking length to each side
-  intron_gr_flanked = intron_gr + flank_length
 
-  if (!no_flanking_merge) {  
-    intron_gr_flanked = .add_metadata(intron_gr_flanked, x=x)
+  # add flanking length to each side
+  intron_gr_flanked <- intron_gr + flank_length
+
+  if (!no_flanking_merge) {
+    intron_gr_flanked <- .add_metadata(intron_gr_flanked, x =x)
   }
-  
+
   # remake intron GRangesList
-  intron_grl <- BiocGenerics::relist(intron_gr_flanked, 
-                                    lapply(structure(seq_along(intron_gr_flanked),
-                                    names = intron_gr_flanked$transcript_id), function(i) i))
-  
-  
+  intron_grl <- BiocGenerics::relist(intron_gr_flanked,
+                    lapply(structure(seq_along(intron_gr_flanked),
+                                    names = intron_gr_flanked$transcript_id
+                          ),
+                          function(i) i
+                    )
+                )
+
   ############################################################################
   # extract sequences from genome
   ############################################################################
   .say(quiet, "  - Extracting sequences from the genome")
-  
+
   grl <- c(spliced_grl, intron_grl)
 
   # make sure introns don't out of boundary
@@ -275,16 +281,16 @@ make_splici_txome <- function(genome_path,
     x = x,
     transcripts = grl
   )
-  
+
   # If having duplicated sequences, only keep one
   if (dedup_seqs) {
-    seqs <- unique(seqs)
+    seqs <- dedup_sequences(seqs)
     grl <- grl[names(seqs)]
   }
-  
+
   # save some space
   rm(x)
-  
+
   ############################################################################
   # process final outputs
   ############################################################################
@@ -379,7 +385,6 @@ make_splici_txome <- function(genome_path,
     }
   }
   .say(quiet, "Done")
-
 }
 
 # This function takes a GRanage object and its genome, then returns
@@ -395,7 +400,9 @@ make_splici_txome <- function(genome_path,
   ## TODO: Revisit this
   intron_gr$transcript_id <- stringr::word(names(intron_gr), 1, sep = '-')
   intron_gr$gene_id <- intron_gr$transcript_id
-  intron_gr$transcript_id <- make.unique(paste0(intron_gr$transcript_id, "-I"), sep = '')
+  intron_gr$transcript_id <- make.unique(paste0(intron_gr$transcript_id,
+                                                "-I"),
+                                        sep = "")
   intron_gr$gene_id <- paste0(intron_gr$gene_id, "-I")
   intron_gr$exon_id <- intron_gr$transcript_id
   ## --
@@ -411,4 +418,53 @@ make_splici_txome <- function(genome_path,
   )
   intron_gr <- GenomicRanges::trim(intron_gr)
   intron_gr
+}
+
+dedup_sequences <- function(seqs, out_dup) {
+  # sort seqs based on names
+  # so that unique() will keep the
+  # one with the smallest lex order
+  seqs <- seqs[sort(names(seqs))]
+
+  # save some work, only build list for duplicated items
+  # get all non-unique seqs
+  # the representative is not included
+  duplicated_seqs <- seqs[duplicated(seqs)]
+
+  # this is what we will return
+  unique_seqs <- unique(seqs)
+  rm(seqs)
+
+  # we find all the names for each duplicated seq
+  record_representatives <- list()
+  while (length(duplicated_seqs) > 0) {
+    # find the the elements that have
+    # the same seq with the first element
+    dup_idx <- which(duplicated_seqs == duplicated_seqs[1])
+    dup_names <- names(duplicated_seqs)[dup_idx]
+
+    # find the representative seq in the unqie_seqs
+    repr_name <- names(unique_seqs)[unique_seqs == duplicated_seqs[1]]
+
+    # record them
+    record_representatives[[repr_name]] <- dup_names
+
+    # remove them from duplicated_seqs
+    duplicated_seqs <- duplicated_seqs[-dup_idx]
+  }
+
+  # dump dropped names as salmon
+  out_df <- data.frame(RetainedRef = rep(names(record_representatives),
+                                          sapply(record_representatives,
+                                                length)
+                                      ),
+                        DuplicateRef= unlist(record_representatives)
+            )
+  write.table(out_df, file = out_dup, quote = FALSE,
+            sep = "\t", row.names = FALSE, col.names = TRUE)
+  write.table(out_df, file = "testfile", quote = FALSE,
+            sep = "\t", row.names = FALSE, col.names = TRUE)
+
+  # return unique seqs
+  return(unique_seqs)
 }
