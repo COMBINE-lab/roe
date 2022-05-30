@@ -95,7 +95,7 @@ load_processed_quant <- function(dataset_ids = c(),
 
     # if the user just wants the data frame, return it
     if (length(dataset_ids) == 0) {
-        return (available_datasets)
+        return(available_datasets)
     }
 
     dataset_ids <- check_dataset_ids(dataset_ids)

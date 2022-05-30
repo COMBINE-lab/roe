@@ -50,8 +50,8 @@ test_that("expected files are written", {
     # create simulated genome
     genome <- Biostrings::readDNAStringSet(file.path(genome_path))
     genome_revcompl <- Biostrings::reverseComplement(genome)
-    chr1 = as.character(genome[["chr1"]])
-    chr2_rev = as.character(genome_revcompl[["chr2"]])
+    chr1 <- as.character(genome[["chr1"]])
+    chr2_rev <- as.character(genome_revcompl[["chr2"]])
 
     # run the function
     make_splici_txome(gtf_path = gtf_path,
@@ -61,13 +61,14 @@ test_that("expected files are written", {
                       output_dir = output_dir,
                       extra_spliced = extra_spliced,
                       extra_unspliced = extra_unspliced,
-                      dedup_seqs = FALSE
+                      dedup_seqs = FALSE,
+                      quiet = TRUE
                       # ,write_actual_flank=FALSE
                       )
 
     # harvest the output
-    splici_seqs = readBStringSet(file.path(output_dir, "splici_fl3.fa"))
-    t2g_3col = read.csv(file.path(output_dir, "splici_fl3_t2g_3col.tsv"),header = FALSE, sep = "\t")
+    splici_seqs <- readBStringSet(file.path(output_dir, "splici_fl3.fa"))
+    t2g_3col <- read.csv(file.path(output_dir, "splici_fl3_t2g_3col.tsv"),header = FALSE, sep = "\t")
     # t2g = read.csv(file.path(output_dir, "splici_fl3_t2g.tsv"),header = FALSE, sep = "\t")
     
     # Define expected sequences

@@ -139,7 +139,7 @@ make_splici_txome <- function(genome_path,
                                       extra_unspliced = extra_unspliced,
                                       dedup_seqs = dedup_seqs,
                                       no_flanking_merge = no_flanking_merge,
-                                      quiet = FALSE
+                                      quiet = quiet
                                       )
   )
 }
@@ -284,7 +284,7 @@ make_splici_txome <- function(genome_path,
 
   # If having duplicated sequences, only keep one
   if (dedup_seqs) {
-    seqs <- .dedup_sequences(seqs)
+    seqs <- .dedup_sequences(seqs, out_dup = out_dup)
     grl <- grl[names(seqs)]
   }
 
@@ -458,7 +458,7 @@ make_splici_txome <- function(genome_path,
                                           sapply(record_representatives,
                                                 length)
                                       ),
-                        DuplicateRef= unlist(record_representatives)
+                        DuplicateRef = unlist(record_representatives)
             )
   write.table(out_df, file = out_dup, quote = FALSE,
             sep = "\t", row.names = FALSE, col.names = TRUE)

@@ -2,19 +2,19 @@
 #' @rdname ProcessedQuant
 #' 
 methods::setClass("ProcessedQuant",
-                    methods::representation(dataset_id = "numeric",
-                                            chemistry = "character",
-                                            reference = "character",
-                                            dataset_name = "character",
-                                            link = "character",
-                                            data_url = "character",
-                                            MD5	= "character",
-                                            feature_barcode	= "character",
-                                            library_csv	= "character",
-                                            quant_link = "character",
-                                            quant_path = "character",
-                                            tar_path = "character",
-                                            sce = "SingleCellExperiment")
+            methods::representation(dataset_id = "numeric",
+                                    chemistry = "character",
+                                    reference = "character",
+                                    dataset_name = "character",
+                                    dataset_url = "character",
+                                    fastq_url = "character",
+                                    fastq_MD5sum = "character",
+                                    feature_barcode_csv_url = "character",
+                                    multiplexing_library_csv_url = "character",
+                                    quant_tar_url = "character",
+                                    quant_path = "character",
+                                    tar_path = "character",
+                                    sce = "SingleCellExperiment")
                 )
 
 #' return the dataframe that contains the details of all
@@ -68,24 +68,28 @@ ProcessedQuant <- function(dataset_id) {
         stop("Invalid dataset_id type, accepts integer only.")
     }
     dataset_info <- available_datasets[dataset_id, ]
-    processed_quant <- methods::new("ProcessedQuant",
-                                    dataset_id = dataset_info$"dataset_id",
-                                    chemistry = dataset_info$"chemistry",
-                                    reference = dataset_info$"reference",
-                                    dataset_name = dataset_info$"dataset_name",
-                                    link = dataset_info$"link",
-                                    data_url = dataset_info$"data_url",
-                                    MD5	= dataset_info$"MD5",
-                                    quant_link	= dataset_info$"quant_link",
-                                    sce = SingleCellExperiment())
-    
-    if (!is.na(dataset_info$feature_barcode)) {
-        processed_quant@feature_barcode <- dataset_info$feature_barcode
+    processed_quant <- methods::new(
+                            "ProcessedQuant",
+                            dataset_id = dataset_info$"dataset_id",
+                            chemistry = dataset_info$"chemistry",
+                            reference = dataset_info$"reference",
+                            dataset_name = dataset_info$"dataset_name",
+                            dataset_url = dataset_info$"dataset_url",
+                            fastq_url = dataset_info$"fastq_url",
+                            fastq_MD5sum = dataset_info$"fastq_MD5sum",
+                            quant_tar_url = dataset_info$"quant_tar_url",
+                            sce = SingleCellExperiment()
+    )
+
+    if (!is.na(dataset_info$feature_barcode_csv_url)) {
+        processed_quant@feature_barcode_csv_url <-
+            dataset_info$feature_barcode_csv_url
     }
-    if (!is.na(dataset_info$library_csv)) {
-        processed_quant@library_csv <- dataset_info$library_csv
+    if (!is.na(dataset_info$multiplexing_library_csv_url)) {
+        processed_quant@multiplexing_library_csv_url <-
+            dataset_info$multiplexing_library_csv_url
     }
-    
+
     processed_quant
 }
 
@@ -158,7 +162,7 @@ fetch_quant <- function(processed_quant,
         }
     }
 
-    url <- processed_quant@quant_link
+    url <- processed_quant@quant_tar_url
     utils::download.file(url = url,
                         destfile = tar_file,
                         quiet = TRUE,
@@ -400,10 +404,10 @@ check_validity <- function(processed_quant) {
         identical(processed_quant@chemistry, character(0)),
         identical(processed_quant@reference, character(0)),
         identical(processed_quant@dataset_name, character(0)),
-        identical(processed_quant@link, character(0)),
-        identical(processed_quant@data_url, character(0)),
-        identical(processed_quant@MD5, character(0)),
-        identical(processed_quant@quant_link, character(0))
+        identical(processed_quant@dataset_url, character(0)),
+        identical(processed_quant@fastq_url, character(0)),
+        identical(processed_quant@fastq_MD5sum, character(0)),
+        identical(processed_quant@quant_tar_url, character(0))
     ))) {
         stop(paste0("Invalid processed_quant, use ",
                     "ProcessedQuant(dataset_id) to ",

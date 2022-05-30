@@ -112,8 +112,8 @@ pq_ds3@dataset_name
 
 
 # get the path to the quantification result of datset #1 and #3
-pq_ds1@quant_link
-pq_ds3@quant_link
+pq_ds1@quant_tar_url
+pq_ds3@quant_tar_url
 
 # Notice that in the return object of fetch_processed_quant() 
 # the sce slot is empty.
@@ -147,8 +147,8 @@ pq_ds3@dataset_name
 
 
 # get the path to the quantification result of datset #1 and #3
-pq_ds1@quant_link
-pq_ds3@quant_link
+pq_ds1@quant_tar_url
+pq_ds3@quant_tar_url
 
 # get the SingleCellExperiment object
 pq_ds1@sce
