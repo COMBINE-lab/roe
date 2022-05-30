@@ -24,14 +24,14 @@ test_that("ProcessedQuant class can fetch, decompress and load a dataset", {
     pq <- ProcessedQuant(22)
 
     # test error
-    expect_error(decompress_quant(pq, quiet = TRUE))
-    expect_error(load_quant(pq, quiet = TRUE))
+    expect_error(decompress_quant(pq, quiet = FALSE))
+    expect_error(load_quant(pq, quiet = FALSE))
 
 
     # test fetch_quant
     tar_dir <- file.path(output_dir, "quant_tar")
     tar_name <- "test_ds22_quant_tar"
-    pq <- fetch_quant(pq, tar_dir = tar_dir, tar_name = tar_name, quiet = TRUE)
+    pq <- fetch_quant(pq, tar_dir = tar_dir, tar_name = tar_name, quiet = FALSE)
     expected_tar_path <- file.path(tar_dir, paste0(tar_name, ".tar"))
     expect_equal(file.exists(expected_tar_path), TRUE)
 
@@ -40,7 +40,7 @@ test_that("ProcessedQuant class can fetch, decompress and load a dataset", {
         tar_dir = tar_dir,
         tar_name = tar_name,
         force = TRUE,
-        quiet = TRUE
+        quiet = FALSE
     )
     expect_equal(file.exists(expected_tar_path), TRUE)
 
@@ -53,7 +53,7 @@ test_that("ProcessedQuant class can fetch, decompress and load a dataset", {
     pq <- decompress_quant(pq,
         quant_dir = quant_dir,
         quant_path_name = "test_ds22_quant_dir",
-        quiet = TRUE
+        quiet = FALSE
     )
 
     expected_quant_path <- file.path(quant_dir,
@@ -69,19 +69,19 @@ test_that("ProcessedQuant class can fetch, decompress and load a dataset", {
         quant_dir = quant_dir,
         quant_path_name = "test_ds22_quant_dir",
         force = TRUE,
-        quiet = TRUE
+        quiet = FALSE
     )
     expect_equal(file.exists(expected_quant_path), TRUE)
 
     # test load_quant
-    pq <- load_quant(pq, quiet = TRUE)
+    pq <- load_quant(pq, quiet = FALSE)
     expect_s4_class(pq@sce, "SingleCellExperiment")
 
     # test a few more output_formats
     output_format <- "raw"
     pq <- load_quant(pq,
         output_format = output_format,
-        quiet = TRUE
+        quiet = FALSE
     )
     expected_assay_name <- c("spliced", "unspliced", "ambiguous")
     expect_equal(sort(expected_assay_name),
@@ -93,7 +93,7 @@ test_that("ProcessedQuant class can fetch, decompress and load a dataset", {
     )
     pq <- load_quant(pq,
         output_format = output_format,
-        quiet = TRUE)
+        quiet = FALSE)
     expected_assay_name <- c("testA", "testB")
     expect_equal(sort(expected_assay_name),
         sort(names(pq@sce@assays))
