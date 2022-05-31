@@ -1,5 +1,7 @@
-library(roe)
-library(SingleCellExperiment)
+suppressPackageStartupMessages({
+    library(roe)
+    library(SingleCellExperiment)
+})
 test_that("ProcesedQuant class initialization works", {
     ds <- get_available_dataset_df()[22, ]
     pq <- ProcessedQuant(22)
