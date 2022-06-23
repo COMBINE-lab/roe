@@ -30,7 +30,7 @@ See \code{\link{fetch_processed_quant}} for details.}
 \item{delete_tar}{logical whether to delete the compressed datasets after
 decompressing. If FALSE, the tar files
  will be stored in a folder called
-datasets_tar under the \code{fetch_dir}.}
+quant_tar under the \code{fetch_dir}.}
 
 \item{output_format}{can be \emph{either} a valid
 \code{\link[fishpond]{loadFry}} \code{outputFormat}

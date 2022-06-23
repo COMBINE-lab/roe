@@ -110,7 +110,7 @@ extra_unspliced = system.file("extdata/extra_unspliced.txt", package = "roe")
 output_dir = tempdir()
 read_length=5
 flank_trim_length = 2
-filename_prefix = "transcriptome_splici"
+filename_prefix = "splici"
 
 # run the function
 make_splici_txome(genome_path = genome_path,

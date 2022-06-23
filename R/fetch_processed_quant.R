@@ -145,7 +145,7 @@ fetch_processed_quant <- function(dataset_ids = c(),
     # download the quantification tar file for each queried dataset.
     pq_list <- list()
     # folder for (temporarily) storing tar files.
-    tar_dir <- file.path(fetch_dir, "datasets_tar")
+    tar_dir <- file.path(fetch_dir, "quant_tar")
     dir.create(tar_dir, recursive = TRUE,
                 showWarnings = FALSE)
 

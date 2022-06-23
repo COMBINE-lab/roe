@@ -6,7 +6,7 @@ test_that("fetch processed quant function works", {
     output_dir <- tempdir()
     ds <- get_available_dataset_df()[22, ]
     pq <- fetch_processed_quant(22, fetch_dir = output_dir)[[1]]
-    tar_dir <- file.path(output_dir, "datasets_tar")
+    tar_dir <- file.path(output_dir, "quant_tar")
     expected_tar_path <- file.path(tar_dir, paste0(pq@dataset_id, ".tar"))
     quant_dir <- output_dir
     expected_quant_path <- file.path(quant_dir,

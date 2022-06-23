@@ -13,7 +13,7 @@
 #' @param delete_tar logical whether to delete the compressed datasets after
 #' decompressing. If FALSE, the tar files
 #'  will be stored in a folder called
-#' datasets_tar under the \code{fetch_dir}.
+#' quant_tar under the \code{fetch_dir}.
 #' @param output_format can be \emph{either} a valid
 #' \code{\link[fishpond]{loadFry}} \code{outputFormat}
 #' or a list of it. The \code{names} of the list must
@@ -148,7 +148,7 @@ load_processed_quant <- function(dataset_ids = c(),
 
     pq_list <- list()
     # folder for (temporarily) storing tar files.
-    tar_dir <- file.path(fetch_dir, "datasets_tar")
+    tar_dir <- file.path(fetch_dir, "quant_tar")
     dir.create(tar_dir, recursive = TRUE,
                 showWarnings = FALSE)
 

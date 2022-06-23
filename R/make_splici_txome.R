@@ -96,7 +96,7 @@
 #' output_dir = tempdir()
 #' read_length=5
 #' flank_trim_length = 2
-#' filename_prefix = "transcriptome_splici"
+#' filename_prefix = "splici"
 #' 
 #' # run the function
 #' make_splici_txome(genome_path = genome_path,
@@ -155,7 +155,6 @@ make_splici_txome <- function(genome_path,
 #' @importFrom GenomeInfoDb seqlevels seqlengths
 #' @importFrom Biobase rowMin rowMax
 #' @importFrom rlang .data
-#' @importFrom dplyr %>% mutate
 #' @importFrom utils write.table
 
 .make_splici_txome <- function(genome_path,
@@ -200,7 +199,8 @@ make_splici_txome <- function(genome_path,
   # output file names
   filename_prefix <- paste0(filename_prefix, "_fl", flank_length)
   out_fa <- file.path(output_dir, paste0(filename_prefix, ".fa"))
-  # out_t2g <- file.path(output_dir, paste0(filename_prefix, "_t2g.tsv"))
+  # out_t2g <- file.path(output_dir, 
+  #                      paste0(filename_prefix, "_t2g.tsv"))
   out_t2g3col <- file.path(output_dir, paste0(filename_prefix,
                                               "_t2g_3col.tsv"))
   out_dup <- file.path(output_dir, "duplicate_entries.tsv")
@@ -217,13 +217,14 @@ make_splici_txome <- function(genome_path,
   ############################################################################
 
   suppressMessages({
-    suppressWarnings({grl <- eisaR::getFeatureRanges(
-      gtf = file.path(gtf_path),
-      featureType = c("spliced", "intron"),
-      intronType = "separate",
-      flankLength = 0,
-      joinOverlappingIntrons = TRUE,
-      verbose = FALSE
+    suppressWarnings({
+      grl <- eisaR::getFeatureRanges(
+        gtf = file.path(gtf_path),
+        featureType = c("spliced", "intron"),
+        intronType = "separate",
+        flankLength = 0,
+        joinOverlappingIntrons = TRUE,
+        verbose = FALSE
     )})
   })
 
@@ -234,6 +235,10 @@ make_splici_txome <- function(genome_path,
   .say(quiet, "  - Processing spliced transcripts")
   spliced_idx <- names(grl) %in% S4Vectors::metadata(grl)$featurelist$spliced
   spliced_grl <- grl[spliced_idx]
+
+  spliced_t2g_df <- eisaR::getTx2Gene(spliced_grl)
+  spliced_t2g_3col_df <- spliced_t2g_df
+  spliced_t2g_3col_df$splice_status <- "S"
 
   ############################################################################
   # Get reduced introns
@@ -264,6 +269,18 @@ make_splici_txome <- function(genome_path,
                     )
                 )
 
+  # make sure introns don't out of boundary
+  suppressWarnings({
+    GenomeInfoDb::seqlevels(intron_grl) <- GenomeInfoDb::seqlevels(x)
+    GenomeInfoDb::seqlengths(intron_grl) <- GenomeInfoDb::seqlengths(x)
+    intron_grl <- GenomicRanges::trim(intron_grl)
+  })
+
+  unspliced_t2g_df <- eisaR::getTx2Gene(intron_grl)
+  unspliced_t2g_3col_df <- unspliced_t2g_df
+  unspliced_t2g_3col_df$splice_status <- "U"
+  unspliced_t2g_3col_df$gene_id <- stringr::str_extract(unspliced_t2g_3col_df$gene_id, "^.*(?=\\-)")
+
   ############################################################################
   # extract sequences from genome
   ############################################################################
@@ -271,12 +288,6 @@ make_splici_txome <- function(genome_path,
 
   grl <- c(spliced_grl, intron_grl)
 
-  # make sure introns don't out of boundary
-  suppressWarnings({
-    GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(x)
-    GenomeInfoDb::seqlengths(grl) <- GenomeInfoDb::seqlengths(x)
-    grl <- GenomicRanges::trim(grl)
-  })
   seqs <- GenomicFeatures::extractTranscriptSeqs(
     x = x,
     transcripts = grl
@@ -296,19 +307,14 @@ make_splici_txome <- function(genome_path,
   ############################################################################
   .say(quiet, "- Writing outputs")
 
-
-  df <- eisaR::getTx2Gene(grl)
+  # df <- rbind(spliced_t2g_df, unspliced_t2g_df)
   # utils::write.table(df, out_t2g, sep = "\t", row.names = FALSE,
   #                    quote = FALSE, col.names = FALSE)
-  ## TODO: Make this more robust to possible transcript names containing '-'
-  df <- df %>%
-    dplyr::mutate(gene_id = stringr::word(.data$gene_id, 1, sep = '-'),
-                  status = ifelse(stringr::str_detect(.data$transcript_id, '-'),
-                                  'U', 'S'))
   .say(quiet, "  - Writing spliced and intron sequences")
 
+  df_3col <- rbind(spliced_t2g_3col_df, unspliced_t2g_3col_df)
   Biostrings::writeXStringSet(seqs, out_fa, format = "fasta")
-  utils::write.table(df, out_t2g3col
+  utils::write.table(df_3col, out_t2g3col
                       , sep = "\t",
                       row.names = FALSE, quote = FALSE, col.names = FALSE)
 
@@ -360,7 +366,7 @@ make_splici_txome <- function(genome_path,
       for (ln in lns) {
         if (startsWith(ln, ">")) {
           # it is a header, write to t2g file and fasta file
-          txp_name = gsub(">", "", ln)
+          txp_name <- gsub(">", "", ln)
           # utils::write.table(matrix(c(txp_name,
           #                             paste0(txp_name, "-U")),
           #                           nrow = 1), file = out_t2g,
@@ -411,12 +417,14 @@ make_splici_txome <- function(genome_path,
     S4Vectors::mcols(intron_gr)[, c("exon_id", "exon_rank",
                                     "transcript_id", "gene_id", "type")]
 
-  # make sure intron ranges are within chromosome boundary
-  GenomeInfoDb::seqlevels(intron_gr) <- GenomeInfoDb::seqlevels(x)
-  GenomeInfoDb::seqlengths(intron_gr) <- suppressWarnings(
-    GenomeInfoDb::seqlengths(x)
-  )
-  intron_gr <- GenomicRanges::trim(intron_gr)
+
+  # make sure introns don't out of boundary
+  suppressWarnings({
+    GenomeInfoDb::seqlevels(intron_grl) <- GenomeInfoDb::seqlevels(x)
+    GenomeInfoDb::seqlengths(intron_grl) <- GenomeInfoDb::seqlengths(x)
+    intron_grl <- GenomicRanges::trim(intron_grl)
+  })
+
   intron_gr
 }
 
