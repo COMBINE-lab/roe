@@ -11,7 +11,7 @@
 #' @param delete_tar logical whether to delete the compressed datasets after
 #' decompressing. If FALSE, the tar files
 #'  will be stored in a folder called
-#' datasets_tar under the \code{fetch_dir}.
+#' quant_tar under the \code{fetch_dir}.
 #' @param quiet logical whether to display no messages.
 #'
 #' @author Dongze He

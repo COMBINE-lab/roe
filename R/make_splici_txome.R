@@ -260,6 +260,7 @@ make_splici_txome <- function(genome_path,
     intron_gr_flanked <- .add_metadata(intron_gr_flanked, x =x)
   }
 
+  intron_gr_flanked$gene_id <- stringr::str_extract(intron_gr_flanked$gene_id, "^.*(?=\\-)")
   # remake intron GRangesList
   intron_grl <- BiocGenerics::relist(intron_gr_flanked,
                     lapply(structure(seq_along(intron_gr_flanked),
@@ -279,7 +280,7 @@ make_splici_txome <- function(genome_path,
   unspliced_t2g_df <- eisaR::getTx2Gene(intron_grl)
   unspliced_t2g_3col_df <- unspliced_t2g_df
   unspliced_t2g_3col_df$splice_status <- "U"
-  unspliced_t2g_3col_df$gene_id <- stringr::str_extract(unspliced_t2g_3col_df$gene_id, "^.*(?=\\-)")
+  # unspliced_t2g_3col_df$gene_id <- stringr::str_extract(unspliced_t2g_3col_df$gene_id, "^.*(?=\\-)")
 
   ############################################################################
   # extract sequences from genome

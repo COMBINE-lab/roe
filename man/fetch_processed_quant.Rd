@@ -24,7 +24,7 @@ quantification results will be stored. It will be created if not exists.}
 \item{delete_tar}{logical whether to delete the compressed datasets after
 decompressing. If FALSE, the tar files
  will be stored in a folder called
-datasets_tar under the \code{fetch_dir}.}
+quant_tar under the \code{fetch_dir}.}
 
 \item{quiet}{logical whether to display no messages.}
 }

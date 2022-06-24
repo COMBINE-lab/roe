@@ -1,7 +1,7 @@
 Package: roe
 Type: Package
 Title: R utilities for alevin-fry
-Version: 0.3.1
+Version: 0.2.1
 Authors@R: c(person("Charlotte", "Soneson", 
                     role = c("aut"), email = "charlottesoneson@gmail.com", 
                     comment = c(ORCID = "0000-0003-3833-2169")),
@@ -27,7 +27,7 @@ Imports:
     fishpond,
     SingleCellExperiment,
     methods
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Suggests: 
     rmarkdown,
     knitr,
@@ -38,4 +38,3 @@ Depends:
     R (>= 2.10)
 URL: https://github.com/COMBINE-lab/roe
 BugReports: https://github.com/COMBINE-lab/roe/issues
-
