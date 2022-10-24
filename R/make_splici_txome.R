@@ -204,6 +204,7 @@ make_splici_txome <- function(genome_path,
   out_t2g3col <- file.path(output_dir, paste0(filename_prefix,
                                               "_t2g_3col.tsv"))
   out_dup <- file.path(output_dir, "duplicate_entries.tsv")
+  out_name2id <- file.path(output_dir, paste0("gene_id_to_name.tsv"))
   .say(quiet, "- Processing spliced transcripts and introns...")
 
   .say(quiet, "  - Loading the input files")
@@ -236,7 +237,7 @@ make_splici_txome <- function(genome_path,
   spliced_idx <- names(grl) %in% S4Vectors::metadata(grl)$featurelist$spliced
   spliced_grl <- grl[spliced_idx]
 
-  spliced_t2g_df <- eisaR::getTx2Gene(spliced_grl)
+  spliced_t2g_df <- eisaR::getTx2Gene(spliced_grl, filepath = out_name2id)
   spliced_t2g_3col_df <- spliced_t2g_df
   spliced_t2g_3col_df$splice_status <- "S"
 
