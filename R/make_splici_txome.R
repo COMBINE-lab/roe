@@ -422,9 +422,9 @@ make_splici_txome <- function(genome_path,
 
   # make sure introns don't out of boundary
   suppressWarnings({
-    GenomeInfoDb::seqlevels(intron_grl) <- GenomeInfoDb::seqlevels(x)
-    GenomeInfoDb::seqlengths(intron_grl) <- GenomeInfoDb::seqlengths(x)
-    intron_grl <- GenomicRanges::trim(intron_grl)
+    GenomeInfoDb::seqlevels(intron_gr) <- GenomeInfoDb::seqlevels(x)
+    GenomeInfoDb::seqlengths(intron_gr) <- GenomeInfoDb::seqlengths(x)
+    intron_gr <- GenomicRanges::trim(intron_gr)
   })
 
   intron_gr
